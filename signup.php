@@ -101,12 +101,11 @@
 
         .signup-container input, .signup-container select {
             width: 100%;
-            padding: 6px; /* Reduced from 10px */
-            margin-bottom: 12px; /* Slightly reduced spacing */
+            padding: 6px; 
+            margin-bottom: 12px; 
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 14px; /* Adjusted font size */
-        }
+            font-size: 14px;
 
         .signup-container button {
             width: 100%;
