@@ -107,34 +107,23 @@
         }
 
         .login-container button {
+            display: inline-block;
+            text-decoration: none;
+            color: rgb(255, 255, 255);
+            border: 1px solid black;
             width: 100%;
             padding: 10px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
+            background: black;
+            position: relative;
             cursor: pointer;
-            transition: background 0.3s ease;
         }
 
         .login-container button:hover {
-            background-color:rgb(79, 34, 34);
             border: 1px solid rgb(0, 0, 0);
- 
-            color: white;
+            background:rgb(255, 255, 255);
+            color: black;
             transition: 1s;
-        }
-        .login-container button{
-            display: inline-block;
-            text-decoration: none;
-            color: white;
-            border: 1px solid black;
-            padding: 12px 34px;
-            font-size: 1.2em;
-            background:rgb(0, 0, 0) ;
-            position: relative;
-            cursor: pointer;
         }
 
         .login-container p {

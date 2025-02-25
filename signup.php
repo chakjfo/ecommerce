@@ -77,7 +77,7 @@
         }
 
         .signup-container {
-            background: rgba(255, 255, 255, 0.58); /* 80% transparent */
+            background: rgba(255, 255, 255, 0.58);
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -86,62 +86,60 @@
             margin-top: 55px;
         }
 
-
         .signup-container img {
             width: 80px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             height: 20px;
         }
 
         .signup-container h2 {
             font-size: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             color: #333;
+        }
+
+        .signup-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
         }
 
         .signup-container input, .signup-container select {
             width: 100%;
-            padding: 6px; 
-            margin-bottom: 12px; 
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 14px;
+            height: 30px;
+            margin: 2px 0;
+            font-size: 10px;
+        }
 
         .signup-container button {
+            display: inline-block;
+            text-decoration: none;
+            color: rgb(255, 255, 255);
+            border: 1px solid black;
             width: 100%;
             padding: 10px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
+            background: black;
+            position: relative;
             cursor: pointer;
-            transition: background 0.3s ease;
         }
 
         .signup-container button:hover {
-            background-color:rgb(79, 34, 34);
             border: 1px solid rgb(0, 0, 0);
- 
-            color: white;
+            background:rgb(255, 255, 255);
+            color: black;
             transition: 1s;
-        }
-        .signup-container button{
-            display: inline-block;
-            text-decoration: none;
-            color: white;
-            border: 1px solid black;
-            padding: 12px 34px;
-            font-size: 1.2em;
-            background:rgb(0, 0, 0) ;
-            position: relative;
-            cursor: pointer;
         }
 
 
         .signup-container p {
             padding: 10px;
-            font-size: 12px; /* Adjust the font size to make the text smaller */
+            font-size: 12px;
             color: black;
         }
 
