@@ -5,6 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
     $confirm_password = trim($_POST['confirm_password']);
+    $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $role = trim($_POST['role']);
 
@@ -18,8 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert into database
-    $stmt = $conn->prepare("INSERT INTO users (Username, Password, PhoneNumber, Role) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $username, $hashed_password, $phone, $role);
+    $stmt = $conn->prepare("INSERT INTO users (Username, Password, PhoneNumber, Email, Role) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssss", $username, $hashed_password, $phone, $email, $role);
 
     if ($stmt->execute()) {
         echo "<script>alert('Signup successful! You can now log in.'); window.location.href='login.php';</script>";

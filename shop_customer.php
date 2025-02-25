@@ -1,9 +1,15 @@
 <?php 
     session_start();
+    require 'db_connection.php'; // Ensure this connects to your database
+
     if (!isset($_SESSION['username'])) {
         $_SESSION['username'] = "Guest";
     }
     $username = htmlspecialchars($_SESSION['username']);
+
+    // Fetch products from the database
+    $query = "SELECT * FROM products";
+    $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +28,15 @@
             margin: 0;
             padding: 0;
             font-family: "Anton", sans-serif;
+            box-sizing: border-box;
+        }
+        header {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            background: white;
         }
         .running-text {
             background-color: black;
@@ -32,7 +47,7 @@
             overflow: hidden;
             white-space: nowrap;
             position: relative;
-            height: 10px;
+            height: 30px;
             display: flex;
             align-items: center;
             font-family: "Atkinson Hyperlegible Mono", monospace;
@@ -115,6 +130,56 @@
             text-transform: uppercase;
             cursor: pointer;
         }
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 50px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .product-card h3 {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .product-card p {
+            font-size: 16px;
+            color: #555;
+        }
+        .product-card .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .add-to-cart {
+            background: black;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .add-to-cart:hover {
+            background: gray;
+        }
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
@@ -126,6 +191,8 @@
     </style>
 </head>
 <body>
+
+<header>
     <div class="running-text">
         <span>Welcome to The Accents Clothing! Enjoy our latest collection with free shipping.</span>
     </div>
@@ -152,5 +219,22 @@
             <?php endif; ?>
         </div>
     </nav>
+</header>
+
+<div class="container">
+    <?php while ($row = $result->fetch_assoc()) : ?>
+        <?php 
+            $images = json_decode($row['images'], true);
+            $firstImage = isset($images[0]) ? "uploads/" . $images[0] : "images/no_image_available.png";
+        ?>
+        <a href="product_details.php?id=<?php echo $row['ProductID']; ?>" class="product-card">
+            <img src="<?php echo $firstImage; ?>" alt="<?php echo htmlspecialchars($row['ProductName']); ?>">
+            <h3><?php echo htmlspecialchars($row['ProductName']); ?></h3>
+            <div class="price">₱<?php echo number_format($row['Price'], 2); ?></div>
+        </a>
+    <?php endwhile; ?>
+</div>
+
+
 </body>
 </html>

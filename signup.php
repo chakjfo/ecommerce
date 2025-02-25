@@ -175,6 +175,7 @@
                 <input type="password" name="password" placeholder="Password" required>
                 <input type="password" name="confirm_password" placeholder="Confirm Password" required>
                 <input type="text" name="phone" placeholder="Phone Number" required>
+                <input type="email" name="email" placeholder="Email" required>
                 <select name="role" required>
                     <option value="customer">Customer</option>
                     <option value="admin">Admin</option>
