@@ -16,6 +16,7 @@ $username = $_SESSION['username'];
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 
     <style>
         body {
@@ -30,6 +31,9 @@ $username = $_SESSION['username'];
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: fixed;
+            left: 0;
+            top: 0;
         }
         .sidebar .logo {
             padding: 20px;
@@ -79,25 +83,26 @@ $username = $_SESSION['username'];
         .user-info div {
             margin-left: 12px;
         }
+        .content {
+            margin-left: 200px;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
-
 <div class="flex">
     <!-- Sidebar -->
     <div class="sidebar">
         <div>
             <div class="logo">Dashboard</div>
             <nav>
-                <a href="#"><i class="fas fa-users"></i> <span class="ml-3">Users</span></a>
-                <a href="#"><i class="fas fa-box"></i> <span class="ml-3">Orders</span></a>
-                <a id="load-products" class="cursor-pointer"><i class="fas fa-shopping-cart"></i> <span class="ml-3">Items</span></a>
+                <a onclick="loadPage('users.php')"><i class="fas fa-users"></i> <span class="ml-3">Users</span></a>
+                <a onclick="loadPage('items.php')"><i class="fas fa-shopping-cart"></i> <span class="ml-3">Items</span></a>
                 <a href="logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </nav>
         </div>
-
         <div class="user-info">
             <img src="https://via.placeholder.com/40" alt="User Profile">
             <div>
@@ -106,20 +111,26 @@ $username = $_SESSION['username'];
             </div>
         </div>
     </div>
-
-    <!-- Content -->
-    <div class="flex-1 p-10" id="content">
-        <h1 class="text-2xl font-bold">Welcome, <?= htmlspecialchars($username); ?>!</h1>
+    
+    <!-- Main Content -->
+    <div class="content">
+        <h1 class="text-2xl font-bold">Welcome to the Dashboard</h1>
+        <div id="page-content"></div>
     </div>
 </div>
 
 <script>
-    $(document).ready(function() {
-        $("#load-products").click(function() {
-            $("#content").load("products.php");
-        });
-    });
+    function loadPage(page) {
+        fetch(page)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('page-content').innerHTML = data;
+                if (page === 'users.php') {
+                    $('#usersTable').DataTable();
+                }
+            })
+            .catch(error => console.error('Error loading page:', error));
+    }
 </script>
-
 </body>
 </html>

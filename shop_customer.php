@@ -6,10 +6,6 @@
         $_SESSION['username'] = "Guest";
     }
     $username = htmlspecialchars($_SESSION['username']);
-
-    // Fetch products from the database
-    $query = "SELECT * FROM products";
-    $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -220,21 +216,5 @@
         </div>
     </nav>
 </header>
-
-<div class="container">
-    <?php while ($row = $result->fetch_assoc()) : ?>
-        <?php 
-            $images = json_decode($row['images'], true);
-            $firstImage = isset($images[0]) ? "uploads/" . $images[0] : "images/no_image_available.png";
-        ?>
-        <a href="product_details.php?id=<?php echo $row['ProductID']; ?>" class="product-card">
-            <img src="<?php echo $firstImage; ?>" alt="<?php echo htmlspecialchars($row['ProductName']); ?>">
-            <h3><?php echo htmlspecialchars($row['ProductName']); ?></h3>
-            <div class="price">₱<?php echo number_format($row['Price'], 2); ?></div>
-        </a>
-    <?php endwhile; ?>
-</div>
-
-
 </body>
 </html>
