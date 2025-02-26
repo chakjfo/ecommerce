@@ -275,14 +275,12 @@ require_once "db_connection.php";
             // Edit button click handler
             $('#editUserBtn').on('click', function() {
                 if (selectedUserId) {
-                    // Fetch user data for the modal
                     $.ajax({
                         url: 'get_user.php',
                         type: 'GET',
                         data: { userId: selectedUserId },
                         dataType: 'json',
                         success: function(data) {
-                            // Populate the form with user data
                             $('#userId').val(data.UserID);
                             $('#username').val(data.Username);
                             $('#email').val(data.Email);
@@ -290,7 +288,6 @@ require_once "db_connection.php";
                             $('#role').val(data.Role);
                             $('#newPassword').val('');
                             
-                            // Show the modal
                             $('#editUserModal').css('display', 'block');
                         },
                         error: function() {
@@ -325,7 +322,6 @@ require_once "db_connection.php";
                         if (response.success) {
                             alert('User updated successfully!');
                             $('#editUserModal').css('display', 'none');
-                            // Reload the page to refresh the user list
                             location.reload();
                         } else {
                             alert('Error: ' + response.message);
@@ -348,13 +344,9 @@ require_once "db_connection.php";
                         success: function(response) {
                             if (response.success) {
                                 alert('User deleted successfully!');
-
-                                // Remove the row from DataTable dynamically
                                 let table = $('#usersTable').DataTable();
                                 let row = $('tr[data-id="' + selectedUserId + '"]');
                                 table.row(row).remove().draw();
-
-                                // Disable buttons since no row is selected
                                 $('#editUserBtn, #deleteUserBtn').prop('disabled', true);
                             } else {
                                 alert('Error: ' + response.message);

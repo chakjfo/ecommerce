@@ -163,7 +163,7 @@
             <div class="nav-links" id="navLinks">
             <i class="fa fa-xmark" onclick="hideMenu()"></i>
                 <ul>
-                    <li><a href="shop.php">SHOP</a></li>
+                    <li><a href="shop_customer.php">SHOP</a></li>
                     <li><a href="">ABOUT US</a></li>
                     <li><a href="">CONTACT US</a></li>
                     <li><a href="login.php">LOG IN</a></li>
@@ -175,7 +175,7 @@
         <div class="text-box">
             <h1>We make stories, not shirts.</h1>
             <p>The Accents is a lifestyle brand that embraces diversity in different subcultures in our society.</p>
-            <a href="shop.php" class="hero-btn">SHOP NOW</a>
+            <a href="shop_customer.php" class="hero-btn">SHOP NOW</a>
         </div>
     </section>
     <script>
