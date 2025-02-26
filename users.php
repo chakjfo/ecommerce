@@ -131,7 +131,7 @@ require_once "db_connection.php";
         .delete-btn {
             padding: 8px 15px;
             margin-bottom: 20px;
-            background-color:rgb(255, 0, 0);
+            background-color: rgb(255, 0, 0);
             color: white;
             border: none;
             border-radius: 4px;
@@ -139,7 +139,7 @@ require_once "db_connection.php";
             margin-top: 10px;
         }
         .delete-btn:hover {
-            background-color:rgb(255, 0, 0);
+            background-color: rgb(255, 0, 0);
         }
         .delete-btn:disabled {
             background-color: #cccccc;
@@ -189,7 +189,7 @@ require_once "db_connection.php";
             $result = $conn->query($sql);
             
             if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
+                while ($row = $result->fetch_assoc()) {
                     echo "<tr data-id='" . $row["UserID"] . "'>";
                     echo "<td>" . $row["UserID"] . "</td>";
                     echo "<td>" . htmlspecialchars($row["Username"]) . "</td>";
@@ -348,7 +348,14 @@ require_once "db_connection.php";
                         success: function(response) {
                             if (response.success) {
                                 alert('User deleted successfully!');
-                                location.reload();
+
+                                // Remove the row from DataTable dynamically
+                                let table = $('#usersTable').DataTable();
+                                let row = $('tr[data-id="' + selectedUserId + '"]');
+                                table.row(row).remove().draw();
+
+                                // Disable buttons since no row is selected
+                                $('#editUserBtn, #deleteUserBtn').prop('disabled', true);
                             } else {
                                 alert('Error: ' + response.message);
                             }
