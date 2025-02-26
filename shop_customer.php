@@ -1,11 +1,15 @@
 <?php 
     session_start();
-    require 'db_connection.php'; // Ensure this connects to your database
+    require 'db_connection.php';
 
     if (!isset($_SESSION['username'])) {
         $_SESSION['username'] = "Guest";
     }
     $username = htmlspecialchars($_SESSION['username']);
+    
+    // Fetch products from database
+    $query = "SELECT * FROM products ORDER BY ProductID DESC";
+    $result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -145,11 +149,22 @@
         .product-card:hover {
             transform: scale(1.05);
         }
-        .product-card img {
+        .product-card .image-container {
+            position: relative;
             width: 100%;
             height: 200px;
-            object-fit: cover;
+            overflow: hidden;
             border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s;
+        }
+        .product-card:hover img {
+            transform: scale(1.1);
         }
         .product-card h3 {
             margin-top: 10px;
@@ -158,11 +173,24 @@
         .product-card p {
             font-size: 16px;
             color: #555;
+            margin: 8px 0;
         }
         .product-card .price {
             font-size: 20px;
             font-weight: bold;
             margin: 10px 0;
+        }
+        .product-card .sizes {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .product-card .size-badge {
+            background-color: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
         }
         .add-to-cart {
             background: black;
@@ -172,6 +200,9 @@
             text-decoration: none;
             font-weight: bold;
             transition: background 0.3s;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
         }
         .add-to-cart:hover {
             background: gray;
@@ -198,9 +229,9 @@
         </div>
         <div class="nav-links">
             <a href="shop_customer.php">Shop</a>
-            <a href="#">Women</a>
-            <a href="#">Men</a>
-            <a href="#">Accessories</a>
+            <a href="shop_customer.php?category=Women">Women</a>
+            <a href="shop_customer.php?category=Men">Men</a>
+            <a href="shop_customer.php?category=Accessories">Accessories</a>
         </div>
         <div class="user-links">
             <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
@@ -216,5 +247,25 @@
         </div>
     </nav>
 </header>
+<div class="container" id="product-container">
+    <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+        <div class="product-card">
+            <div class="image-container">
+                <img src="<?= $row['images'] ?>" alt="<?= $row['ProductName'] ?>">
+            </div>
+            <h3><?= $row['ProductName'] ?></h3>
+            <p><?= $row['Description'] ?></p>
+            <p class="price">$<?= number_format($row['Price'], 2) ?></p>
+            <div class="sizes">
+                <?php foreach (explode(',', $row['sizes']) as $size) : ?>
+                    <span class="size-badge"><?= trim($size) ?></span>
+                <?php endforeach; ?>
+            </div>
+            <button class="add-to-cart">Add to Cart</button>
+        </div>
+    <?php endwhile; ?>
+</div>
+
+
 </body>
 </html>
