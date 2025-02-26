@@ -1,15 +1,15 @@
 <?php 
-    session_start();
-    require 'db_connection.php';
+session_start();
+require 'db_connection.php';
 
-    if (!isset($_SESSION['username'])) {
-        $_SESSION['username'] = "Guest";
-    }
-    $username = htmlspecialchars($_SESSION['username']);
-    
-    // Fetch products from database
-    $query = "SELECT * FROM products ORDER BY ProductID DESC";
-    $result = mysqli_query($conn, $query);
+if (!isset($_SESSION['username'])) {
+    $_SESSION['username'] = "Guest";
+}
+$username = htmlspecialchars($_SESSION['username']);
+
+// Fetch products from database
+$query = "SELECT * FROM products ORDER BY ProductID DESC";
+$result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -234,14 +234,21 @@
             <a href="shop_customer.php?category=Accessories">Accessories</a>
         </div>
         <div class="user-links">
-            <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-            <a href="notifications.php"><i class="fas fa-bell"></i></a>
-            <div class="profile-circle">
-                <?php echo strtoupper(substr($username, 0, 1)); ?>
-            </div>
             <?php if ($username !== "Guest") : ?>
+                <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+                <a href="notifications.php"><i class="fas fa-bell"></i></a>
+            <?php else : ?>
+                <a href="login.php"><i class="fas fa-shopping-cart"></i></a>
+                <a href="login.php"><i class="fas fa-bell"></i></a>
+            <?php endif; ?>
+
+            <?php if ($username !== "Guest") : ?>
+                <div class="profile-circle">
+                    <?php echo strtoupper(substr($username, 0, 1)); ?>
+                </div>
                 <a href="logout.php" style="font-size: 14px; color: black;">Logout</a>
             <?php else : ?>
+                <a href="signup.php" style="font-size: 14px;">Sign Up</a>
                 <a href="login.php" style="font-size: 14px;">Login</a>
             <?php endif; ?>
         </div>
@@ -261,11 +268,14 @@
                     <span class="size-badge"><?= trim($size) ?></span>
                 <?php endforeach; ?>
             </div>
-            <button class="add-to-cart">Add to Cart</button>
+            <?php if ($username !== "Guest") : ?>
+                <button class="add-to-cart">Add to Cart</button>
+            <?php else : ?>
+                <a href="login.php" class="add-to-cart">Add to Cart</a>
+            <?php endif; ?>
         </div>
     <?php endwhile; ?>
 </div>
-
 
 </body>
 </html>
