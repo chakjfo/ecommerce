@@ -10,6 +10,10 @@ $username = htmlspecialchars($_SESSION['username']);
 // Fetch products from database
 $query = "SELECT * FROM products ORDER BY ProductID DESC";
 $result = mysqli_query($conn, $query);
+
+// Fetch categories from the database
+$category_query = "SELECT category_name FROM categories";
+$category_result = $conn->query($category_query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -225,13 +229,16 @@ $result = mysqli_query($conn, $query);
     </div>
     <nav>
         <div class="logo">
-            <a href="shop_customer.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
+            <a href="homepage.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
         </div>
         <div class="nav-links">
             <a href="shop_customer.php">Shop</a>
-            <a href="shop_customer.php?category=Women">Women</a>
-            <a href="shop_customer.php?category=Men">Men</a>
-            <a href="shop_customer.php?category=Accessories">Accessories</a>
+            <?php
+            while ($row = $category_result->fetch_assoc()) {
+                $category = htmlspecialchars($row['category_name']); 
+                echo "<a href='shop_customer.php?category=$category'>$category</a>";
+            }
+            ?>
         </div>
         <div class="user-links">
             <?php if ($username !== "Guest") : ?>

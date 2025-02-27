@@ -1,11 +1,37 @@
 <?php
+// Start session
 session_start();
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
+
+// Include database connection
+require_once 'db_connection.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-require_once "db_connection.php";
-$username = $_SESSION['username'];
+
+// Check if user has admin role
+$userID = $_SESSION['user_id'];
+$sql = "SELECT Role FROM users WHERE UserID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 1) {
+    $row = $result->fetch_assoc();
+    if ($row['Role'] !== 'admin') {
+        // Redirect non-admin users
+        header("Location: login.php");
+        exit();
+    }
+} else {
+    // User not found
+    session_destroy();
+    header("Location: homepage.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,204 +39,311 @@ $username = $_SESSION['username'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-
+    <title>Admin Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #f3f4f6;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
         }
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background-color: rgb(8, 8, 8);
-            color: white;
-            position: fixed;
-            left: 0;
-            top: 0;
-            transition: 0.3s ease-in-out;
-            overflow: hidden;
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            min-height: 100vh;
+            background: #343a40;
+            color: #fff;
+            transition: all 0.3s;
         }
-        .sidebar .logo {
+        #sidebar.active {
+            margin-left: -250px;
+        }
+        #sidebar .sidebar-header {
             padding: 20px;
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 1px solid #333;
+            background: #212529;
         }
-        .sidebar nav a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
+        #sidebar ul.components {
+            padding: 20px 0;
+            border-bottom: 1px solid #4b545c;
+        }
+        #sidebar ul p {
+            color: #fff;
+            padding: 10px;
+        }
+        #sidebar ul li a {
+            padding: 10px;
+            font-size: 1.1em;
+            display: block;
+            color: #fff;
             text-decoration: none;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
         }
-        .sidebar nav a i {
-            margin-right: 10px;
+        #sidebar ul li a:hover {
+            color: #000;
+            background: #fff;
         }
-        .sidebar nav a:hover {
-            background-color: white;
-            color: black;
+        #sidebar ul li.active > a,
+        a[aria-expanded="true"] {
+            color: #fff;
+            background: #6d7fcc;
         }
-        .logout-btn {
+        ul ul a {
+            font-size: 0.9em !important;
+            padding-left: 30px !important;
+            background: #4b545c;
+        }
+        .wrapper {
             display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: white;
-            background-color: black;
-            text-decoration: none;
-            margin-top: 10px;
-        }
-        .logout-btn:hover {
-            background-color: white;
-            color: black;
-        }
-        .user-info {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-        }
-        .user-info img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: 0.3s;
             width: 100%;
         }
-        /* Toggle Sidebar */
-        .sidebar.collapsed {
-            width: 70px;
+        #content {
+            width: 100%;
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.3s;
         }
-        .sidebar.collapsed .logo {
-            font-size: 16px;
-            padding: 15px;
-        }
-        .sidebar.collapsed nav a {
-            justify-content: center;
-            padding: 15px;
-        }
-        .sidebar.collapsed nav a span {
-            display: none;
-        }
-        .sidebar.collapsed .user-info {
-            display: none;
-        }
-        .content.collapsed {
-            margin-left: 70px;
-        }
-        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                left: -250px;
-                width: 250px;
+            #sidebar {
+                margin-left: -250px;
             }
-            .sidebar.active {
-                left: 0;
-            }
-            .content {
+            #sidebar.active {
                 margin-left: 0;
-                width: 100%;
             }
-            .toggle-btn {
-                display: block;
+            #sidebarCollapse span {
+                display: none;
             }
         }
-        /* Sidebar Toggle Button */
-        .toggle-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: black;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 5px;
-            display: none;
-            z-index: 1000;
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
 <body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Admin Panel</h3>
+            </div>
 
-<!-- Sidebar -->
-<div class="sidebar">
-    <div class="logo">Dashboard</div>
-    <nav>
-        <a href="#" onclick="loadPage('users.php')"><i class="fas fa-users"></i> <span>Users</span></a>
-        <a onclick="loadPage('products.php')"><i class="fas fa-box"></i> <span>Products</span></a>
-        <a onclick="loadPage('orders.php')"><i class="fas fa-shopping-cart"></i> <span>Orders</span></a>
-        <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
-    </nav>
-    <div class="user-info">
-        <img src="https://via.placeholder.com/40" alt="User Profile">
-        <div>
-            <p><?php echo htmlspecialchars($username); ?></p>
-            <p class="text-sm text-blue-200">Admin</p>
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="admin.php">Home</a>
+                </li>
+                <li>
+                    <a href="#productSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Products</a>
+                    <ul class="collapse list-unstyled" id="productSubmenu">
+                        <li>
+                            <a href="products.php">View All Products</a>
+                        </li>
+                        <li>
+                            <a href="create_product.php">Add New Product</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#categorySubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Categories</a>
+                    <ul class="collapse list-unstyled" id="categorySubmenu">
+                        <li>
+                            <a href="categories.php">View All Categories</a>
+                        </li>
+                        <li>
+                            <a href="add_category.php">Add New Category</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#userSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Users</a>
+                    <ul class="collapse list-unstyled" id="userSubmenu">
+                        <li>
+                            <a href="users.php">View All Users</a>
+                        </li>
+                        <li>
+                            <a href="add_user.php">Add New User</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#orderSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Orders</a>
+                    <ul class="collapse list-unstyled" id="orderSubmenu">
+                        <li>
+                            <a href="orders.php">View All Orders</a>
+                        </li>
+                        <li>
+                            <a href="order_details.php">Order Details</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="logout.php">Logout</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-dark">
+                        <i class="fas fa-align-left"></i>
+                        <span>Toggle Sidebar</span>
+                    </button>
+                    <div>
+                        <h4>Welcome, <?php echo $_SESSION['Username'] ?? 'Admin'; ?></h4>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+                <h2 class="mb-4">Dashboard</h2>
+                
+                <div class="row">
+                    <?php
+                    // Count products
+                    $productCount = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
+                    
+                    // Count users
+                    $userCount = $conn->query("SELECT COUNT(*) as count FROM users")->fetch_assoc()['count'];
+                    
+                    // Count categories
+                    $categoryCount = $conn->query("SELECT COUNT(*) as count FROM categories")->fetch_assoc()['count'];
+                    
+                    // Count orders
+                    $orderCount = $conn->query("SELECT COUNT(*) as count FROM orders")->fetch_assoc()['count'];
+                    ?>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="card dashboard-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Products</h5>
+                                        <h3 class="mb-0"><?php echo $productCount; ?></h3>
+                                    </div>
+                                    <i class="fas fa-box fa-3x"></i>
+                                </div>
+                                <a href="products.php" class="btn btn-light mt-3">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="card dashboard-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Categories</h5>
+                                        <h3 class="mb-0"><?php echo $categoryCount; ?></h3>
+                                    </div>
+                                    <i class="fas fa-tags fa-3x"></i>
+                                </div>
+                                <a href="categories.php" class="btn btn-light mt-3">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="card dashboard-card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Users</h5>
+                                        <h3 class="mb-0"><?php echo $userCount; ?></h3>
+                                    </div>
+                                    <i class="fas fa-users fa-3x"></i>
+                                </div>
+                                <a href="users.php" class="btn btn-light mt-3">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="card dashboard-card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title">Orders</h5>
+                                        <h3 class="mb-0"><?php echo $orderCount; ?></h3>
+                                    </div>
+                                    <i class="fas fa-shopping-cart fa-3x"></i>
+                                </div>
+                                <a href="orders.php" class="btn btn-light mt-3">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="mb-0">Recent Orders</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>User</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Get recent orders
+                                        $recentOrders = $conn->query("
+                                            SELECT o.OrderID, u.Username, o.OrderDate, o.TotalAmount 
+                                            FROM orders o
+                                            LEFT JOIN users u ON o.UserID = u.UserID
+                                            ORDER BY o.OrderDate DESC
+                                            LIMIT 5
+                                        ");
+                                        
+                                        if ($recentOrders->num_rows > 0) {
+                                            while($order = $recentOrders->fetch_assoc()) {
+                                                echo "<tr>";
+                                                echo "<td>" . $order['OrderID'] . "</td>";
+                                                echo "<td>" . ($order['Username'] ?? 'Guest') . "</td>";
+                                                echo "<td>" . date('M d, Y', strtotime($order['OrderDate'])) . "</td>";
+                                                echo "<td>$" . number_format($order['TotalAmount'], 2) . "</td>";
+                                                echo "<td>
+                                                    <a href='view_order.php?id=" . $order['OrderID'] . "' class='btn btn-sm btn-info'>View</a>
+                                                </td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='5' class='text-center'>No recent orders</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Toggle Button -->
-<button class="toggle-btn" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i>
-</button>
-
-<!-- Main Content -->
-<div class="content">
-    <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
-    <p>Manage your dashboard efficiently.</p>
-</div>
-
-<script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const content = document.querySelector('.content');
-
-        if (window.innerWidth <= 768) {
-            sidebar.classList.toggle('active');
-        } else {
-            sidebar.classList.toggle('collapsed');
-            content.classList.toggle('collapsed');
-        }
-    }
-
-    window.addEventListener("resize", function() {
-        if (window.innerWidth > 768) {
-            document.querySelector('.sidebar').classList.remove('active');
-        }
-    });
-    // Add this script to your dashboard page
-function loadPage(page) {
-    $.ajax({
-        url: page,
-        type: 'GET',
-        success: function(data) {
-            $('.content').html(data);
-        },
-        error: function() {
-            $('.content').html('<h2>Error loading page</h2>');
-        }
-    });
-}
-</script>
-
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar
+            document.getElementById('sidebarCollapse').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
