@@ -154,9 +154,6 @@ if ($result->num_rows === 1) {
                         <li>
                             <a href="categories.php">View All Categories</a>
                         </li>
-                        <li>
-                            <a href="add_category.php">Add New Category</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -164,9 +161,6 @@ if ($result->num_rows === 1) {
                     <ul class="collapse list-unstyled" id="userSubmenu">
                         <li>
                             <a href="users.php">View All Users</a>
-                        </li>
-                        <li>
-                            <a href="add_user.php">Add New User</a>
                         </li>
                     </ul>
                 </li>

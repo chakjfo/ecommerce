@@ -33,7 +33,7 @@ if ($result->num_rows === 1) {
     exit();
 }
 
-// Check if product id is provided
+// Check if product ID is provided
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['error_message'] = "Invalid product ID.";
     header("Location: products.php");
@@ -42,26 +42,29 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $productId = $_GET['id'];
 
-// Get product details with category name
+// Get product data with category information
 $productQuery = "
     SELECT p.*, c.category_name
     FROM products p
     LEFT JOIN categories c ON p.categories = c.id
     WHERE p.ProductID = ?
 ";
-$stmt = $conn->prepare($productQuery);
-$stmt->bind_param("i", $productId);
-$stmt->execute();
-$product = $stmt->get_result()->fetch_assoc();
+$productStmt = $conn->prepare($productQuery);
+$productStmt->bind_param("i", $productId);
+$productStmt->execute();
+$productResult = $productStmt->get_result();
 
-if (!$product) {
+if ($productResult->num_rows !== 1) {
     $_SESSION['error_message'] = "Product not found.";
     header("Location: products.php");
     exit();
 }
 
-// Get product images
-$productImages = json_decode($product['images'], true) ?: [];
+$product = $productResult->fetch_assoc();
+$productImages = json_decode($product['images'], true);
+if (!is_array($productImages)) {
+    $productImages = ['uploads/no-image.jpg'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +72,7 @@ $productImages = json_decode($product['images'], true) ?: [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Product</title>
+    <title>View Product - <?php echo htmlspecialchars($product['ProductName']); ?></title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -145,28 +148,33 @@ $productImages = json_decode($product['images'], true) ?: [];
             }
         }
         .product-image {
-            width: 100%;
-            height: 300px;
-            object-fit: contain;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .product-thumbnail {
+        .thumbnail-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .thumbnail {
             width: 80px;
             height: 80px;
             object-fit: cover;
-            border: 1px solid #ddd;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 10px;
-            transition: all 0.3s;
+            transition: border-color 0.3s ease;
         }
-        .product-thumbnail:hover {
+        .thumbnail:hover, .thumbnail.active {
             border-color: #007bff;
         }
-        .product-thumbnail.active {
-            border: 2px solid #007bff;
+        .product-info-table th {
+            width: 30%;
         }
     </style>
 </head>
@@ -199,9 +207,6 @@ $productImages = json_decode($product['images'], true) ?: [];
                         <li>
                             <a href="categories.php">View All Categories</a>
                         </li>
-                        <li>
-                            <a href="add_category.php">Add New Category</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -209,9 +214,6 @@ $productImages = json_decode($product['images'], true) ?: [];
                     <ul class="collapse list-unstyled" id="userSubmenu">
                         <li>
                             <a href="users.php">View All Users</a>
-                        </li>
-                        <li>
-                            <a href="add_user.php">Add New User</a>
                         </li>
                     </ul>
                 </li>
@@ -247,45 +249,170 @@ $productImages = json_decode($product['images'], true) ?: [];
             </nav>
 
             <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Product Details</h2>
-                    <div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h2>Product Details: <?php echo htmlspecialchars($product['ProductName']); ?></h2>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="products.php" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Products
+                        </a>
                         <a href="edit_product.php?id=<?php echo $productId; ?>" class="btn btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $productId; ?>)" class="btn btn-danger ms-2">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
-                        <a href="products.php" class="btn btn-secondary ms-2">
-                            <i class="fas fa-arrow-left"></i> Back to List
+                            <i class="fas fa-edit"></i> Edit Product
                         </a>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><?php echo htmlspecialchars($product['ProductName']); ?></h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
+                <div class="row">
+                    <!-- Product Images -->
+                    <div class="col-md-5">
+                        <div class="card mb-4">
+                            <div class="card-body">
                                 <?php if (!empty($productImages)): ?>
-                                    <div class="main-image-container mb-3">
-                                        <img id="main-product-image" src="<?php echo htmlspecialchars($productImages[0]); ?>" alt="Product Image" class="product-image">
-                                    </div>
+                                    <img id="mainImage" src="<?php echo htmlspecialchars($productImages[0]); ?>" alt="<?php echo htmlspecialchars($product['ProductName']); ?>" class="product-image img-fluid">
                                     
+                                    <!-- Thumbnails -->
                                     <?php if (count($productImages) > 1): ?>
-                                        <div class="d-flex mb-4">
-                                            <?php foreach($productImages as $index => $image): ?>
-                                                <img src="<?php echo htmlspecialchars($image); ?>" alt="Product Thumbnail" class="product-thumbnail<?php echo $index === 0 ? ' active' : ''; ?>" onclick="changeImage(this)">       
+                                        <div class="thumbnail-container">
+                                            <?php foreach($productImages as $index => $imagePath): ?>
+                                                <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="Thumbnail <?php echo $index + 1; ?>" class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" onclick="changeMainImage('<?php echo htmlspecialchars($imagePath); ?>', this)">
                                             <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
                                 <?php else: ?>
-                                    <div class="alert alert-warning">No images available for this product.</div>
+                                    <div class="text-center p-4">
+                                        <i class="fas fa-image fa-5x text-muted"></i>
+                                        <p class="mt-3 text-muted">No images available</p>
+                                    </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="col-md-6">
-                                <h5 class="card-title">Product Details</h5>
-                                <p><strong>Category:</strong> <?php echo htmlspecialchars($product['category_name']); ?></p>
-                                
+                        </div>
+                    </div>
+                    
+                    <!-- Product Information -->
+                    <div class="col-md-7">
+                        <div class="card mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="mb-0">Product Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered product-info-table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Product ID</th>
+                                            <td><?php echo $product['ProductID']; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <td><?php echo htmlspecialchars($product['ProductName']); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Category</th>
+                                            <td><?php echo htmlspecialchars($product['category_name'] ?? 'Uncategorized'); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Price</th>
+                                            <td>$<?php echo number_format($product['Price'], 2); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Stock Quantity</th>
+                                            <td>
+                                                <?php echo $product['StockQuantity']; ?>
+                                                <?php if ($product['StockQuantity'] <= 5): ?>
+                                                    <span class="badge bg-danger ms-2">Low Stock</span>
+                                                <?php elseif ($product['StockQuantity'] <= 20): ?>
+                                                    <span class="badge bg-warning ms-2">Medium Stock</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success ms-2">In Stock</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Created Date</th>
+                                            <td><?php echo date('F j, Y, g:i a', strtotime($product['created_at'])); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Last Updated</th>
+                                            <td><?php echo date('F j, Y, g:i a', strtotime($product['updated_at'])); ?></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Description -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="mb-0">Product Description</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="p-2">
+                                    <?php echo nl2br(htmlspecialchars($product['Description'])); ?>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-end">
+                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $product['ProductID']; ?>)" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Product
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this product?</p>
+                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar
+            document.getElementById('sidebarCollapse').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        });
+        
+        // Change main image
+        function changeMainImage(imagePath, thumbnail) {
+            document.getElementById('mainImage').src = imagePath;
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            thumbnail.classList.add('active');
+        }
+        
+        // Delete confirmation
+        function confirmDelete(productId) {
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            document.getElementById('confirmDeleteBtn').href = 'products.php?delete=' + productId;
+            deleteModal.show();
+        }
+    </script>
+</body>
+</html>

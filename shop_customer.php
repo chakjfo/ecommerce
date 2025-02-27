@@ -261,28 +261,5 @@ $category_result = $conn->query($category_query);
         </div>
     </nav>
 </header>
-<div class="container" id="product-container">
-    <?php while ($row = mysqli_fetch_assoc($result)) : ?>
-        <div class="product-card">
-            <div class="image-container">
-                <img src="<?= $row['images'] ?>" alt="<?= $row['ProductName'] ?>">
-            </div>
-            <h3><?= $row['ProductName'] ?></h3>
-            <p><?= $row['Description'] ?></p>
-            <p class="price">$<?= number_format($row['Price'], 2) ?></p>
-            <div class="sizes">
-                <?php foreach (explode(',', $row['sizes']) as $size) : ?>
-                    <span class="size-badge"><?= trim($size) ?></span>
-                <?php endforeach; ?>
-            </div>
-            <?php if ($username !== "Guest") : ?>
-                <button class="add-to-cart">Add to Cart</button>
-            <?php else : ?>
-                <a href="login.php" class="add-to-cart">Add to Cart</a>
-            <?php endif; ?>
-        </div>
-    <?php endwhile; ?>
-</div>
-
 </body>
 </html>

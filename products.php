@@ -203,9 +203,6 @@ $products = $conn->query($query);
                         <li>
                             <a href="categories.php">View All Categories</a>
                         </li>
-                        <li>
-                            <a href="add_category.php">Add New Category</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -213,9 +210,6 @@ $products = $conn->query($query);
                     <ul class="collapse list-unstyled" id="userSubmenu">
                         <li>
                             <a href="users.php">View All Users</a>
-                        </li>
-                        <li>
-                            <a href="add_user.php">Add New User</a>
                         </li>
                     </ul>
                 </li>
@@ -256,7 +250,7 @@ $products = $conn->query($query);
                         <h2>Products Management</h2>
                     </div>
                     <div class="col-md-6 text-end">
-                        <a href="create_product.php" class="btn btn-primary">
+                        <a href="add_product.php" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Add New Product
                         </a>
                     </div>
