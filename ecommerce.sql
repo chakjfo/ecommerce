@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 26, 2025 at 05:27 PM
+-- Generation Time: Feb 27, 2025 at 07:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,15 +24,43 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orderitems`
+-- Table structure for table `categories`
 --
 
-CREATE TABLE `orderitems` (
-  `OrderItemID` int(11) NOT NULL,
-  `OrderID` int(11) DEFAULT NULL,
-  `ProductID` int(11) DEFAULT NULL,
-  `Quantity` int(11) NOT NULL,
-  `Price` decimal(10,2) NOT NULL
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL,
+  `category_name` varchar(100) NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT current_timestamp(),
+  `date_edited` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `category_name`, `date_added`, `date_edited`) VALUES
+(1, 'Women', '2025-02-26 22:01:49', '2025-02-26 22:01:49'),
+(2, 'Men', '2025-02-26 22:01:49', '2025-02-26 22:01:49'),
+(3, 'Accessories', '2025-02-26 22:01:49', '2025-02-26 22:01:49'),
+(4, 'KIDS', '2025-02-26 22:06:26', '2025-02-26 22:06:26'),
+(5, 'HAHAA', '2025-02-26 22:32:41', '2025-02-26 22:32:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_orders`
+--
+
+CREATE TABLE `customer_orders` (
+  `order_id` int(11) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `address` text NOT NULL,
+  `payment_method` enum('Cash','Credit Card','Debit Card','PayPal') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `order_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -62,18 +90,19 @@ CREATE TABLE `products` (
   `sizes` varchar(255) NOT NULL,
   `StockQuantity` int(11) NOT NULL,
   `images` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `categories` varchar(255) NOT NULL,
+  `edited_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`ProductID`, `ProductName`, `Description`, `Price`, `sizes`, `StockQuantity`, `images`, `created_at`) VALUES
-(13, 'asd', 'asdasdas', 23232.00, 'S,M,L,XL', 2222, '0', '2025-02-25 21:43:03'),
-(14, 'asd', 'asdasdas', 23232.00, 'S,M,L,XL', 2222, '0', '2025-02-25 21:43:05'),
-(16, 'asd', 'asdasdas', 23232.00, 'S,M,L,XL', 2222, '0', '2025-02-25 21:43:06'),
-(17, 'asd', 'asdasdas', 23232.00, 'S,M,L,XL', 2222, '0', '2025-02-25 21:43:06');
+INSERT INTO `products` (`ProductID`, `ProductName`, `Description`, `Price`, `sizes`, `StockQuantity`, `images`, `created_at`, `categories`, `edited_at`, `updated_at`) VALUES
+(14, 'asd', 'asdasdas', 23232.00, 'S,M,L,XL', 2222, '[\"uploads\\/products\\/1740673200_3_pepperoni.jpg\",\"uploads\\/products\\/1740673200_4_spaghetti.jpg\"]', '2025-02-25 21:43:05', '3', '2025-02-27 16:20:00', '2025-02-27 16:52:16'),
+(18, 'sfffffff', 'sdfsfdsf', 1212.00, 'S,M,L,XL', 21, '[\"uploads\\/products\\/1740673751_1_spaghetti.jpg\"]', '2025-02-27 16:21:19', '3', '2025-02-27 16:29:11', '2025-02-27 16:52:16');
 
 -- --------------------------------------------------------
 
@@ -95,20 +124,25 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`UserID`, `Username`, `Password`, `Email`, `PhoneNumber`, `Role`) VALUES
-(1, 'test1', '$2y$10$6LHz5cc/THntr.H0hiOWY.FrxJKISy/OQcHn03AAcmqB64GSkLfpy', '', '09381946512', 'customer'),
-(3, 'admin', '$2y$10$A1ixHknwyjqSxGX6udKTtOWAvCG4hWo9.5lyz6kPMhG6iXKW3VxbW', 'admin1@gmail.com', '09381946512', 'admin');
+(7, 'admin', '$2y$10$HHm1pKneD3dGX2EtYjejF.0m3Y3wXrAhC37tDGi3IhUR0gqXbtgIq', 'admin@gmail.com', '639381946512', 'admin'),
+(12, 'test1', '$2y$10$ykqzvPPRuLeZJQ1TM6VGcepefpLtQmseDG6jIyhRuotTbjB1Hz8Y.', 'dasdda@gmail.com', '029342342', 'customer');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `orderitems`
+-- Indexes for table `categories`
 --
-ALTER TABLE `orderitems`
-  ADD PRIMARY KEY (`OrderItemID`),
-  ADD KEY `OrderID` (`OrderID`),
-  ADD KEY `ProductID` (`ProductID`);
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `customer_orders`
+--
+ALTER TABLE `customer_orders`
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `product_id` (`product_id`);
 
 --
 -- Indexes for table `orders`
@@ -136,10 +170,16 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `orderitems`
+-- AUTO_INCREMENT for table `categories`
 --
-ALTER TABLE `orderitems`
-  MODIFY `OrderItemID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `customer_orders`
+--
+ALTER TABLE `customer_orders`
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -151,24 +191,23 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `orderitems`
+-- Constraints for table `customer_orders`
 --
-ALTER TABLE `orderitems`
-  ADD CONSTRAINT `orderitems_ibfk_1` FOREIGN KEY (`OrderID`) REFERENCES `orders` (`OrderID`),
-  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `products` (`ProductID`);
+ALTER TABLE `customer_orders`
+  ADD CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`);
 
 --
 -- Constraints for table `orders`
