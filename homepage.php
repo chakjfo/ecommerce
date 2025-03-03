@@ -312,7 +312,7 @@
                     <p><i class="fas fa-phone me-2"></i> (123) 456-7890</p>
                     <p><i class="fas fa-envelope me-2"></i> theaccentsclothing.com</p>
                     <div class="social-links mt-4">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href=""><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-pinterest"></i></a>
