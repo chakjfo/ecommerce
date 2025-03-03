@@ -13,11 +13,15 @@ require_once "db_connection.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users Management</title>
+    <title>Category Management</title>
     
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <!-- Bootstrap CSS -->
+     <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -219,6 +223,57 @@ require_once "db_connection.php";
             cursor: not-allowed;
         }
 
+        /* Modal styles */
+.modal-dialog {
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 0.3rem;
+    outline: 0;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
         /* Responsive Table */
         @media (max-width: 768px) {
             .user-table thead { display: none; }
@@ -236,6 +291,11 @@ require_once "db_connection.php";
                 text-align: left;
                 font-weight: bold;
             }
+        }
+
+        /* Add Category Button */
+        .add-btn {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -260,7 +320,7 @@ require_once "db_connection.php";
                     </ul>
                 </li>
                 <li class="active">
-                    <a href="#categorySubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">Categories    </a>
+                    <a href="#categorySubmenu" data-bs-toggle="collapse" aria-expanded="true" class="dropdown-toggle">Categories</a>
                     <ul class="collapse show list-unstyled" id="categorySubmenu">
                         <li class="active">
                             <a href="categories.php">View All Categories</a>
@@ -291,34 +351,44 @@ require_once "db_connection.php";
                 </li>
             </ul>
         </nav>
-<body>
-    <div class="container mt-5">
-        <h2>Category Management</h2>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add Category</button>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Category Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $sql = "SELECT * FROM categories";
-                $result = $conn->query($sql);
-                while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['category_name']; ?></td>
-                        <td>
-                            <button class="btn btn-warning btn-sm">Edit</button>
-                            <button class="btn btn-danger btn-sm">Delete</button>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+
+        <!-- Page Content -->
+        <div id="content">
+            <div class="container mt-5">
+                <h2>Category Management</h2>
+                <button class="btn btn-primary mb-3 add-btn" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="fas fa-plus"></i> Add Category
+                </button>
+                <table class="table table-bordered" id="categoryTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $sql = "SELECT * FROM categories";
+                        $result = $conn->query($sql);
+                        while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $row['category_name']; ?></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm edit-btn" data-id="<?php echo $row['id']; ?>" data-name="<?php echo $row['category_name']; ?>" data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="<?php echo $row['id']; ?>">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     
     <!-- Add Category Modal -->
@@ -330,34 +400,40 @@ require_once "db_connection.php";
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="add_category.php">
+                    <form method="POST" action="add_category.php" id="addCategoryForm">
                         <div class="mb-3">
                             <label for="category_name" class="form-label">Category Name</label>
                             <input type="text" class="form-control" id="category_name" name="category_name" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-        <!-- Edit Category Modal -->
-        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Category</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="edit_category.php">
+                    <form method="POST" action="edit_category.php" id="editCategoryForm">
                         <input type="hidden" id="edit_id" name="id">
                         <div class="mb-3">
                             <label for="edit_category_name" class="form-label">Category Name</label>
                             <input type="text" class="form-control" id="edit_category_name" name="category_name" required>
                         </div>
-                        <button type="submit" class="btn btn-success">Update</button>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Update</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -366,24 +442,63 @@ require_once "db_connection.php";
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
-                // Edit Button Click Event
-                $(".edit-btn").click(function() {
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            $("#edit_id").val(id);
-            $("#edit_category_name").val(name);
-        });
+        $(document).ready(function() {
 
-        // Delete Button Click Event
-        $(".delete-btn").click(function() {
-            if (confirm("Are you sure you want to delete this category?")) {
+                // Initialize Bootstrap modals properly
+    var myModalEl = document.getElementById('addCategoryModal')
+    var modal = new bootstrap.Modal(myModalEl)
+    
+    var editModalEl = document.getElementById('editCategoryModal')
+    var editModal = new bootstrap.Modal(editModalEl)
+    
+            // Initialize DataTable
+            $('#categoryTable').DataTable({
+                "order": [[0, "asc"]],
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+
+            // Edit Button Click Event
+            $(".edit-btn").click(function() {
                 var id = $(this).data('id');
-                $.post("delete_category.php", { id: id }, function(response) {
-                    location.reload();
-                });
-            }
+                var name = $(this).data('name');
+                $("#edit_id").val(id);
+                $("#edit_category_name").val(name);
+            });
+
+            // Delete Button Click Event
+            $(".delete-btn").click(function() {
+                if (confirm("Are you sure you want to delete this category?")) {
+                    var id = $(this).data('id');
+                    $.post("delete_category.php", { id: id }, function(response) {
+                        location.reload();
+                    });
+                }
+            });
+
+            // Form validation for Add Category
+            $("#addCategoryForm").submit(function(e) {
+                var categoryName = $("#category_name").val().trim();
+                if (categoryName === "") {
+                    e.preventDefault();
+                    alert("Category name cannot be empty");
+                }
+            });
+
+            // Form validation for Edit Category
+            $("#editCategoryForm").submit(function(e) {
+                var categoryName = $("#edit_category_name").val().trim();
+                if (categoryName === "") {
+                    e.preventDefault();
+                    alert("Category name cannot be empty");
+                }
+            });
         });
     </script>
 </body>
