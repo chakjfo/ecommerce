@@ -7,14 +7,7 @@ if (!isset($_SESSION['username'])) {
 }
 $username = htmlspecialchars($_SESSION['username']);
 
-$selected_category = isset($_GET['category']) ? $_GET['category'] : "";
-
-if (!empty($selected_category)) {
-    $selected_category = mysqli_real_escape_string($conn, $selected_category);
-    $query = "SELECT * FROM products WHERE category = '$selected_category' ORDER BY ProductID DESC";
-} else {
-    $query = "SELECT * FROM products ORDER BY ProductID DESC";
-}// Check if a category is selected
+// Check if a category is selected
 $selected_category = isset($_GET['category']) ? $_GET['category'] : "";
 
 // Prepare the query based on whether a category is selected
@@ -23,7 +16,7 @@ if (!empty($selected_category)) {
     $selected_category = mysqli_real_escape_string($conn, $selected_category);
     
     // Use JOIN to filter products by category name
-    $query = "SELECT p.* FROM products p 
+    $query = "SELECT p.*, c.category_name FROM products p 
               JOIN categories c ON p.categories = c.id 
               WHERE c.category_name = '$selected_category' 
               ORDER BY p.ProductID DESC";
@@ -250,6 +243,22 @@ $category_result = $conn->query($category_query);
         .add-to-cart:hover {
             background: #333;
         }
+        .cart {
+            background: black;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+            margin-top: auto;
+        }
+        .cart:hover {
+            background: #333;
+        }
         .error-message {
             background-color: #ffecec;
             color: #721c24;
@@ -268,6 +277,14 @@ $category_result = $conn->query($category_query);
             border-radius: 10px;
             width: 100%;
         }
+        .product-card-link {
+           text-decoration: none;
+          color: inherit;
+        }
+.product-card-link:hover .product-card {
+    transform: scale(1.03);
+}
+
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
@@ -283,6 +300,146 @@ $category_result = $conn->query($category_query);
                 height: 400px;
             }
         }
+        .modal {
+    display: none; /* Hide modal by default */
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+    display: flex; /* Show modal when class "show" is added */
+}
+
+
+.modal-content {
+    display: flex;
+    flex-direction: row;  /* Ensure image and text are side by side */
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 60%;
+    max-width: 800px;
+
+}
+
+.modal-left {
+    flex: 1; /* Make sure the image section takes proper space */
+    text-align: center;
+}
+
+.modal-left img {
+    width: 200px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.modal-right {
+    flex: 2; /* Make text take more space */
+    padding-left: 20px;
+    text-align: left;
+}
+
+.quantity-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.quantity-container label {
+    margin-right: 10px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+
+/* Center the dropdowns */
+#sizeSelect, #quantitySelect {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+/* Fix button alignment */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Fix button styling */
+.buy-now {
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    flex: 1;
+    margin-right: 5px;
+}
+
+.add-to-cart {
+    background-color: green;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    flex: 1;
+    margin-left: 5px;
+}
+
+/* Button hover effects */
+.buy-now:hover {
+    background-color: darkred;
+}
+
+.add-to-cart:hover {
+    background-color: darkgreen;
+}
+.dropdown-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.dropdown-item {
+    flex: 1;
+}
+
+.dropdown-item select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
     </style>
 </head>
 <body>
@@ -329,75 +486,111 @@ $category_result = $conn->query($category_query);
 </header>
 
 <div class="container">
-    <?php
-    // Debug: Print column names if needed
-    /*
-    if (mysqli_num_rows($result) > 0) {
-        $first_product = mysqli_fetch_assoc($result);
-        echo "<div class='error-message' style='grid-column: 1 / -1;'>";
-        echo "Column names: ";
-        print_r(array_keys($first_product));
-        echo "</div>";
-        mysqli_data_seek($result, 0);
-    }
-    */
+        <?php while ($product = mysqli_fetch_assoc($result)) : ?>
+            <div class='product-card' onclick="openModal('<?= htmlspecialchars($product['ProductName']) ?>', '<?= htmlspecialchars($product['Description']) ?>', '<?= number_format($product['Price'], 2) ?>', '<?= htmlspecialchars($product['images']) ?>')">
+                <div class='image-container'>
+                <?php 
+                $images = json_decode($product['images'], true); 
+                $first_image = isset($images[0]) ? $images[0] : 'images/default-product.jpg'; 
+                ?>
+<img src='<?= htmlspecialchars($first_image) ?>' alt='<?= htmlspecialchars($product['ProductName']) ?>'>
 
-    // Check if we have products
-    if ($result && mysqli_num_rows($result) > 0) {
-        // Display each product
-        while ($product = mysqli_fetch_assoc($result)) {
-            // Get the product details - adjust column names to match your database
-            $productId = $product['ProductID'] ?? $product['product_id'] ?? $product['id'] ?? 0;
-            $productName = htmlspecialchars($product['ProductName'] ?? $product['product_name'] ?? $product['name'] ?? 'Unknown Product');
-            $productDesc = htmlspecialchars($product['Description'] ?? $product['description'] ?? $product['desc'] ?? '');
-            $productPrice = number_format($product['Price'] ?? $product['price'] ?? 0, 2);
-            
-            // Check different possible image column names
-            $imageColumnNames = ['ImageURL', 'image_url', 'image', 'product_image', 'img', 'photo'];
-            $productImage = 'images/default-product.jpg'; // Default image path
-            
-            foreach ($imageColumnNames as $columnName) {
-                if (isset($product[$columnName]) && !empty($product[$columnName])) {
-                    $productImage = htmlspecialchars($product[$columnName]);
-                    break;
-                }
-            }
-            
-            // Check if sizes field exists in your database
-            $sizes = [];
-            if (isset($product['Sizes']) && !empty($product['Sizes'])) {
-                $sizes = explode(',', $product['Sizes']);
-            } elseif (isset($product['sizes']) && !empty($product['sizes'])) {
-                $sizes = explode(',', $product['sizes']);
-            } else {
-                $sizes = ['S', 'M', 'L']; // Default sizes if not specified
-            }
-            
-            // Output the product card with fixed size
-            echo "<div class='product-card'>";
-            echo "<div class='image-container'>";
-            echo "<img src='$productImage' alt='$productName' onerror=\"this.src='images/default-product.jpg'\">";
-            echo "</div>";
-            echo "<h3>$productName</h3>";
-            echo "<p class='desc'>$productDesc</p>";
-            echo "<div class='price'>$" . $productPrice . "</div>";
-            
-            // Display sizes
-            echo "<div class='sizes'>";
-            foreach ($sizes as $size) {
-                echo "<span class='size-badge'>" . trim($size) . "</span>";
-            }
-            echo "</div>";
-            
-            // Add to cart button
-            echo "<a href='add_to_cart.php?id=$productId' class='add-to-cart'>Add to Cart</a>";
-            echo "</div>";
-        }
-    } else {
-        echo "<div class='no-products'>No products found. Please check your database connection or add products.</div>";
-    }
-    ?>
+                </div>
+                <h3><?= htmlspecialchars($product['ProductName']) ?></h3>
+                <p class='price'>$<?= number_format($product['Price'], 2) ?></p>
+            </div>
+        <?php endwhile; ?>
+    </div>
+
+    <div id="productModal" class="modal">
+   
+    <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">✖</button>
+        <div class="modal-left">
+            <img id="modalImage" src="" alt="Product Image">
+        </div>
+        <div class="modal-right">
+            <h2 id="modalTitle"></h2>
+            <p id="modalDescription" class="modal-description"></p>
+            <p id="modalPrice" class="modal-price"></p>
+
+            <div class="dropdown-container">
+    <div class="dropdown-item">
+        <label for="sizeSelect"><b>Size:</b></label>
+        <select id="sizeSelect">
+            <option value="S">Small (S)</option>
+            <option value="M">Medium (M)</option>
+            <option value="L">Large (L)</option>
+            <option value="XL">Extra Large (XL)</option>
+        </select>
+    </div>
+    <div class="dropdown-item">
+        <label for="quantitySelect"><b>Quantity:</b></label>
+        <select id="quantitySelect">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+    </div>
 </div>
+
+<!-- Buttons -->
+<div class="button-container">
+    <button class="buy-now">Buy Now</button>
+    <button class="add-to-cart">Add to Cart</button>
+</div>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+function openModal(name, description, price, imagesJson) {
+    let images;
+    try {
+        images = JSON.parse(imagesJson); // Convert JSON string to array
+    } catch (error) {
+        console.error("Invalid JSON format for images:", error);
+        images = [];
+    }
+
+    // Ensure imageSrc has a valid image URL or use a fallback
+    let imageSrc = (Array.isArray(images) && images.length > 0 && images[0]) 
+        ? images[0] 
+        : 'images/default-product.jpg'; // Provide a default image
+
+    document.getElementById('modalTitle').innerText = name;
+    document.getElementById('modalDescription').innerText = description;
+    document.getElementById('modalPrice').innerText = "$" + price;
+    document.getElementById('modalImage').src = imageSrc;
+
+    document.getElementById('productModal').classList.add('show'); // Show modal
+}
+
+// Function to close modal
+function closeModal() {
+    document.getElementById('productModal').classList.remove('show');
+}
+
+// Attach event listener to the close button
+document.addEventListener("DOMContentLoaded", function() {
+    const closeButton = document.querySelector(".close-modal");
+    if (closeButton) {
+        closeButton.addEventListener("click", closeModal);
+    }
+});
+document.getElementById('productModal').addEventListener("click", function(event) {
+    if (event.target === this) { // Close only if clicked outside content
+        closeModal();
+    }
+});
+
+</script>
+
 
 </body>
 </html>
