@@ -354,6 +354,10 @@ require_once "db_connection.php";
 
         <!-- Page Content -->
         <div id="content">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark">
+                        <i class="fas fa-align-left"></i>
+                        <span>Toggle Sidebar</span>
+                    </button>
             <div class="container mt-5">
                 <h2>Category Management</h2>
                 <button class="btn btn-primary mb-3 add-btn" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -449,6 +453,13 @@ require_once "db_connection.php";
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar
+            document.getElementById('sidebarCollapse').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        });
+
         $(document).ready(function() {
 
                 // Initialize Bootstrap modals properly
