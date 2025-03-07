@@ -505,7 +505,24 @@ require_once "db_connection.php";
             $('#deleteUserBtn').on('click', function() {
                 if (selectedUserId) {
                     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    document.getElementById('confirmDeleteBtn').href = 'delete_user.php?userId=' + selectedUserId;
+                    $('#confirmDeleteBtn').off('click').on('click', function() {
+                        $.ajax({
+                            url: 'delete_user.php',
+                            method: 'POST',
+                            data: { userId: selectedUserId },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    window.location.reload();
+                                } else {
+                                    alert('Error: ' + (response.message || 'Failed to delete user'));
+                                }
+                            },
+                            error: function() {
+                                alert('Error connecting to server');
+                            }
+                        });
+                    });
                     deleteModal.show();
                 }
             });

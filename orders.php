@@ -290,7 +290,14 @@ $order_result = $conn->query($order_query);
         data: { order_id: orderId },
         dataType: 'json',
         success: function(response) {
+            console.log('AJAX Response:', response); // Debug response
+    if (!response.order || !response.items) {
+        console.error('Invalid response structure');
+        return;
+    }
             // Update modal content
+            console.log('Full response:', response); // Add this
+            console.log('Items array:', response.items); // Add this
             $('#orderId').text(response.order.OrderID);
             $('#customerName').text(response.order.customer_name);
             $('#orderDate').text(new Date(response.order.OrderDate).toLocaleDateString('en-US', {
@@ -308,6 +315,7 @@ $order_result = $conn->query($order_query);
             // Order items
             $('#orderItems').empty();
             response.items.forEach(item => {
+                console.log('Processing item:', item);
                 $('#orderItems').append(
                     `<li class="order-item">
                         <div>${item.ProductName} (ID: ${item.product_id})</div>
