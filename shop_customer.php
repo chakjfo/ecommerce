@@ -378,6 +378,75 @@ $category_result = $conn->query($category_query);
                 width: 100%;
                 margin-bottom: 10px;
             }
+
+            /* Add these styles to your existing CSS */
+
+/* Profile Dropdown Styles */
+.profile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 10px 0;
+    z-index: 1100;
+    margin-top: 8px;
+    display: none;
+}
+
+.profile-dropdown:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: #555;
+}
+
+.dropdown-item:first-child {
+    border-bottom: 1px solid #eee;
+    pointer-events: none;
+}
+
+.profile-circle {
+    cursor: pointer;
+}
+
+/* Show the dropdown when active */
+.profile-dropdown.show {
+    display: block;
+}
         }
     </style>
 </head>
@@ -401,25 +470,37 @@ $category_result = $conn->query($category_query);
                 }
                 ?>
             </div>
-            <div class="user-links">
-                <?php if ($username !== "Guest") : ?>
-                    <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="notifications.php"><i class="fas fa-bell"></i></a>
-                <?php else : ?>
-                    <a href="login.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="login.php"><i class="fas fa-bell"></i></a>
-                <?php endif; ?>
-
-                <?php if ($username !== "Guest") : ?>
-                    <div class="profile-circle">
-                        <?php echo strtoupper(substr($username, 0, 1)); ?>
-                    </div>
-                    <a href="logout.php" style="font-size: 14px; color: black;">Logout</a>
-                <?php else : ?>
-                    <a href="signup.php" style="font-size: 14px;">Sign Up</a>
-                    <a href="login.php" style="font-size: 14px;">Login</a>
-                <?php endif; ?>
+            <!-- Update the user-links div in the header to include the dropdown menu -->
+<div class="user-links">
+    <?php if ($username !== "Guest") : ?>
+        <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+        <a href="notifications.php"><i class="fas fa-bell"></i></a>
+        <div class="profile-container">
+            <div class="profile-circle" id="profileToggle">
+                <?php echo strtoupper(substr($username, 0, 1)); ?>
             </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    <span><?php echo htmlspecialchars($username); ?></span>
+                </div>
+                <a href="order_users.php" class="dropdown-item">
+                    <i class="fas fa-box"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="logout.php" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    <?php else : ?>
+        <a href="login.php"><i class="fas fa-shopping-cart"></i></a>
+        <a href="login.php"><i class="fas fa-bell"></i></a>
+        <a href="signup.php" style="font-size: 14px;">Sign Up</a>
+        <a href="login.php" style="font-size: 14px;">Login</a>
+    <?php endif; ?>
+</div>
         </nav>
     </header>
 
@@ -658,6 +739,29 @@ $category_result = $conn->query($category_query);
             // Initialize cart count
             updateCartCount();
         });
+
+        // Add this to your existing JavaScript section
+
+// Toggle profile dropdown
+document.addEventListener("DOMContentLoaded", function() {
+    const profileToggle = document.getElementById('profileToggle');
+    const profileDropdown = document.getElementById('profileDropdown');
+    
+    if (profileToggle && profileDropdown) {
+        // Toggle dropdown when profile circle is clicked
+        profileToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (profileDropdown.classList.contains('show') && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+    }
+});
     </script>
 </body>
 </html>
