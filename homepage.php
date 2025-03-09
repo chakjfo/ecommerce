@@ -32,8 +32,8 @@
         
         .navbar {
             /* Navbar gradient */
-            background: linear-gradient(90deg, #f8f9fa, #e9ecef) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: transparent !important;
+           
         }
         
         .navbar-brand img {

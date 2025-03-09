@@ -10,27 +10,10 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
 
 $username = htmlspecialchars($_SESSION['username']);
 $user_id = $_SESSION['user_id'];
-
-// Fetch user's orders
-$query = "SELECT o.*, 
-          (SELECT JSON_ARRAYAGG(
-              JSON_OBJECT(
-                  'ProductID', oi.ProductID, 
-                  'ProductName', p.ProductName,
-                  'Quantity', oi.quantity,
-                  'Size', oi.size,
-                  'Price', oi.price
-              )
-          ) 
-          FROM order_items oi 
-          JOIN products p ON oi.ProductID = p.ProductID 
-          WHERE oi.OrderID = o.OrderID) AS items
-          FROM orders o 
-          WHERE o.UserID = ? 
-          ORDER BY o.OrderDate DESC";
+$query = "SELECT * FROM customer_orders WHERE customer_name = ? ORDER BY order_date DESC";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("s", $username); // Assuming username matches customer_name in your table
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -421,68 +404,55 @@ $result = $stmt->get_result();
                 }
                 ?>
             </div>
-            <div class="user-links">
-                <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                <a href="notifications.php"><i class="fas fa-bell"></i></a>
-                <div class="profile-container">
-                    <div class="profile-circle" id="profileToggle">
-                        <?php echo strtoupper(substr($username, 0, 1)); ?>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span><?php echo htmlspecialchars($username); ?></span>
+                <div class="user-links">
+                    <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+                    <a href="notifications.php"><i class="fas fa-bell"></i></a>
+                    <div class="profile-container">
+                        <div class="profile-circle" id="profileToggle">
+                            <?php echo strtoupper(substr($username, 0, 1)); ?>
                         </div>
-                        <a href="order_users.php" class="dropdown-item">
-                            <i class="fas fa-box"></i>
-                            <span>My Orders</span>
-                        </a>
-                        <a href="logout.php" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </a>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span><?php echo htmlspecialchars($username); ?></span>
+                            </div>
+                            <a href="<?php echo $username !== 'Guest' ? 'order_users.php' : 'login.php'; ?>" class="dropdown-item">
+                                <i class="fas fa-box"></i>
+                                <span>My Orders</span>
+                            </a>
+                            <?php if ($username !== 'Guest') : ?>
+                                <a href="logout.php" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
-            </div>
         </nav>
     </header>
 
     <div class="container">
         <h1 class="page-title">My Orders</h1>
         
-        <div class="orders-container">
-            <?php if ($result->num_rows > 0) : ?>
+        <?php if ($result->num_rows > 0) : ?>
+            <div class="orders-container">
                 <?php while ($order = $result->fetch_assoc()) : ?>
                     <div class="order-card">
                         <div class="order-header">
-                            <div class="order-number">Order #<?= $order['OrderID'] ?></div>
+                            <div class="order-number">Order #<?= $order['order_id'] ?></div>
                             <div class="order-date">
-                                <?= date('F j, Y', strtotime($order['OrderDate'])) ?>
+                                <?= date('F j, Y', strtotime($order['order_date'])) ?>
                             </div>
-                            <?php 
-                                $statusClass = '';
-                                switch(strtolower($order['delivery_status'])) {
-                                    case 'pending':
-                                        $statusClass = 'status-pending';
-                                        break;
-                                    case 'delivered':
-                                        $statusClass = 'status-delivered';
-                                        break;
-                                    case 'cancelled':
-                                        $statusClass = 'status-cancelled';
-                                        break;
-                                    default:
-                                        $statusClass = 'status-pending';
-                                }
-                            ?>
-                            <div class="order-status <?= $statusClass ?>">
+                            <div class="order-status <?= strtolower($order['delivery_status']) ?>">
                                 <?= htmlspecialchars($order['delivery_status']) ?>
                             </div>
                         </div>
                         
                         <div class="order-items">
                             <?php 
-                                $items = json_decode($order['items'], true);
+                                $order['items'] = '[' . $order['items'] . ']'; // Make it a valid JSON array
+                                $items = json_decode($order['items'], true); // Convert to PHP array                                
                                 if (!empty($items)) :
                                     foreach ($items as $item) :
                             ?>
@@ -507,7 +477,7 @@ $result = $stmt->get_result();
                         <div class="order-footer">
                             <div class="order-total">Total: $<?= number_format($order['TotalAmount'], 2) ?></div>
                             <div class="shipping-info">
-                                Shipping: <?= htmlspecialchars($order['shipping_address']) ?>
+                                Shipping: <?= htmlspecialchars($order['address']) ?>
                             </div>
                             <div class="payment-method">
                                 Payment: <?= htmlspecialchars($order['payment_method']) ?>
@@ -515,14 +485,14 @@ $result = $stmt->get_result();
                         </div>
                     </div>
                 <?php endwhile; ?>
-            <?php else: ?>
-                <div class="no-orders">
-                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px;"></i>
-                    <p>You don't have any orders yet.</p>
-                    <a href="shop_customer.php" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: black; color: white; text-decoration: none; border-radius: 4px;">Start Shopping</a>
-                </div>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php else: ?>
+            <div class="no-orders">
+                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>You don't have any orders yet.</p>
+                <a href="shop_customer.php" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: black; color: white; text-decoration: none; border-radius: 4px;">Start Shopping</a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script>
