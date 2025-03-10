@@ -32,8 +32,8 @@
         
         .navbar {
             /* Navbar gradient */
-            background: transparent !important;
-           
+            background: linear-gradient(90deg, #f8f9fa, #e9ecef) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
         .navbar-brand img {
@@ -130,6 +130,7 @@
         /* Features section gradient */
         #features {
             background: linear-gradient(to top, rgba(147, 150, 161, 10), rgba(147, 150, 161, 0.8));
+        }
         
         /* Contact section gradient */
         #contact {
@@ -186,6 +187,56 @@
             height: 100%;
             background: linear-gradient(45deg, rgba(0,0,0,0.2), transparent);
         }
+        
+        /* Modal Styles */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .modal-body {
+            padding: 20px 40px;
+        }
+        
+        .modal-logo {
+            width: 120px;
+            margin-bottom: 15px;
+        }
+        
+        .auth-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            border: 1px solid black;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background: black;
+            position: relative;
+            cursor: pointer;
+            transition: 1s;
+        }
+        
+        .auth-btn:hover {
+            border: 1px solid black;
+            background: white;
+            color: black;
+        }
+        
+        .auth-link {
+            color: rgb(22, 95, 168);
+            text-decoration: none;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -201,7 +252,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="homepage.php">SHOP</a>
+                        <a class="nav-link" href="shop_customer.php">SHOP</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#about">ABOUT US</a>
@@ -210,10 +261,10 @@
                         <a class="nav-link" href="#contact">CONTACT US</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="login.php">LOG IN</a>
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">LOG IN</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="signup.php">SIGN UP</a>
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">SIGN UP</a>
                     </li>
                 </ul>
             </div>
@@ -239,6 +290,7 @@
                     <h2 class="section-title">About The Accents</h2>
                     <p>Founded with a vision to celebrate individuality, The Accents Clothing stands as a testament to the rich tapestry of human expression. We believe fashion is more than just clothing—it's a language through which we communicate our identity to the world.</p>
                     <p>Our collections are inspired by various subcultures, movements, and artistic expressions that have shaped modern society. Each piece tells a story, carries a history, and adds an accent to your personal style narrative.</p>
+                    <a href="#" class="btn btn-dark mt-3">Learn More</a>
                 </div>
                 <div class="col-lg-6">
                     <div class="image-container">
@@ -311,7 +363,7 @@
                     <p><i class="fas fa-phone me-2"></i> (123) 456-7890</p>
                     <p><i class="fas fa-envelope me-2"></i> theaccentsclothing.com</p>
                     <div class="social-links mt-4">
-                        <a href=""><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-pinterest"></i></a>
@@ -327,6 +379,71 @@
             <p class="mb-0">&copy; 2025 The Accents Clothing. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
+                    <h2 class="mb-4">Sign in to your account</h2>
+                    <form action="login_process.php" method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="username" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="auth-btn mb-3">Sign in</button>
+                    </form>
+                    <p>Not a member? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up here.</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
+                    <h2 class="mb-4">Create an Account</h2>
+                    <form action="signup_process.php" method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="username" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="phone" class="form-control" placeholder="Phone Number" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <select name="role" class="form-control" required>
+                                <option value="customer">Customer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="auth-btn mb-3">Sign up</button>
+                    </form>
+                    <p>Already have an account? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login here.</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
