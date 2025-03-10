@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 08, 2025 at 09:34 AM
+-- Generation Time: Mar 10, 2025 at 03:54 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -96,7 +96,14 @@ INSERT INTO `customer_orders` (`order_id`, `customer_name`, `product_id`, `email
 (3, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:36:46'),
 (4, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 1, '2025-03-06 20:41:25'),
 (5, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 1, '2025-03-06 20:42:18'),
-(6, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:45:30');
+(6, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:45:30'),
+(7, 'Cha Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 3, '2025-03-09 22:44:33'),
+(8, 'Cha Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 5, '2025-03-09 22:46:28'),
+(9, 'Cha Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 3, '2025-03-09 22:48:09'),
+(10, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 5, '2025-03-09 23:04:28'),
+(11, 'Charish Blase Pulido', 20, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 5, '2025-03-09 23:55:42'),
+(12, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 2, '2025-03-10 01:39:18'),
+(13, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-10 01:49:22');
 
 -- --------------------------------------------------------
 
@@ -110,7 +117,7 @@ CREATE TABLE `orders` (
   `OrderDate` timestamp NOT NULL DEFAULT current_timestamp(),
   `TotalAmount` decimal(10,2) NOT NULL,
   `delivery_date` date DEFAULT NULL,
-  `delivery_status` varchar(50) DEFAULT 'Pending',
+  `delivery_status` enum('Pending','Shipped','Delivered') DEFAULT 'Pending',
   `shipping_address` varchar(255) NOT NULL,
   `payment_method` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -120,10 +127,9 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`OrderID`, `UserID`, `OrderDate`, `TotalAmount`, `delivery_date`, `delivery_status`, `shipping_address`, `payment_method`) VALUES
-(3, 13, '2025-03-06 20:36:46', 83.75, '2025-03-16', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'cash_on_delivery'),
-(4, 13, '2025-03-06 20:41:25', 35.15, '2025-03-16', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'paypal'),
-(5, 13, '2025-03-06 20:42:18', 35.15, '2025-03-16', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'paypal'),
-(6, 13, '2025-03-06 20:45:30', 35.15, '2025-03-16', 'Pending', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'credit_card');
+(11, 13, '2025-03-09 23:55:42', 97.20, '2025-03-20', 'Pending', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'paypal'),
+(12, 13, '2025-03-10 01:39:18', 58.32, '2025-03-20', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'credit_card'),
+(13, 13, '2025-03-10 01:49:22', 29.16, '2025-03-20', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'cash_on_delivery');
 
 -- --------------------------------------------------------
 
@@ -165,9 +171,9 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`ProductID`, `ProductName`, `Description`, `Price`, `sizes`, `StockQuantity`, `images`, `created_at`, `categories`, `edited_at`, `updated_at`) VALUES
-(20, 'JESUS SAVES', 'Tax not included. Free Shipping.', 18.00, '', 0, '[\"uploads\\/products\\/product_67c9f2f1a08c9_1741288177.png\"]', '2025-03-06 19:09:37', '7', '2025-03-06 20:36:46', '2025-03-06 20:36:46'),
-(21, 'OG Logo', 'Tax not included. Free shipping.', 27.00, '', 0, '[\"uploads\\/products\\/product_67c9f3e166dec_1741288417.png\",\"uploads\\/products\\/product_67c9f3e167223_1741288417.png\"]', '2025-03-06 19:13:37', '9', '2025-03-06 20:45:30', '2025-03-06 20:45:30'),
-(22, 'Scribble Logo Sweat Pants', 'Tax not included. Free shipping.', 27.00, '', 0, '[\"uploads\\/products\\/product_67c9f43f82ef4_1741288511.png\",\"uploads\\/products\\/product_67c9f43f83263_1741288511.png\"]', '2025-03-06 19:15:11', '8', '2025-03-06 20:42:18', '2025-03-06 20:42:18');
+(20, 'JESUS SAVES', 'Tax not included. Free Shipping.', 18.00, '', 0, '[\"uploads\\/products\\/product_67c9f2f1a08c9_1741288177.png\"]', '2025-03-06 19:09:37', '7', '2025-03-09 23:55:42', '2025-03-09 23:55:42'),
+(21, 'OG Logo', 'Tax not included. Free shipping.', 27.00, '', 2, '[\"uploads\\/products\\/product_67c9f3e166dec_1741288417.png\",\"uploads\\/products\\/product_67c9f3e167223_1741288417.png\"]', '2025-03-06 19:13:37', '9', '2025-03-10 01:39:18', '2025-03-10 01:39:18'),
+(22, 'Scribble Logo Sweat Pants', 'Tax not included. Free shipping.', 27.00, '', 20, '[\"uploads\\/products\\/product_67c9f43f82ef4_1741288511.png\",\"uploads\\/products\\/product_67c9f43f83263_1741288511.png\"]', '2025-03-06 19:15:11', '8', '2025-03-10 01:49:22', '2025-03-10 01:49:22');
 
 -- --------------------------------------------------------
 
@@ -216,7 +222,7 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `customer_orders`
   ADD PRIMARY KEY (`order_id`,`product_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD KEY `fk_product` (`product_id`);
 
 --
 -- Indexes for table `orders`
@@ -224,14 +230,6 @@ ALTER TABLE `customer_orders`
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`OrderID`),
   ADD KEY `UserID` (`UserID`);
-
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
 
 --
 -- Indexes for table `products`
@@ -255,7 +253,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -267,19 +265,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `customer_orders`
 --
 ALTER TABLE `customer_orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -301,7 +293,9 @@ ALTER TABLE `users`
 -- Constraints for table `customer_orders`
 --
 ALTER TABLE `customer_orders`
-  ADD CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`);
+  ADD CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`),
+  ADD CONSTRAINT `fk_customer_orders_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `orders`
