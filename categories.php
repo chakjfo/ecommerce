@@ -341,9 +341,6 @@ require_once "db_connection.php";
                         <li>
                             <a href="orders.php">View All Orders</a>
                         </li>
-                        <li>
-                            <a href="order_details.php">Order Details</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -356,7 +353,7 @@ require_once "db_connection.php";
         <div id="content">
         <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
+                        <span></span>
                     </button>
             <div class="container mt-5">
                 <h2>Category Management</h2>

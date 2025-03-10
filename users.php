@@ -284,9 +284,6 @@ require_once "db_connection.php";
                         <li>
                             <a href="orders.php">View All Orders</a>
                         </li>
-                        <li>
-                            <a href="order_details.php">Order Details</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -301,7 +298,7 @@ require_once "db_connection.php";
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
+                        <span></span>
                     </button>
                     <div>
                         <h4>Welcome, <?php echo $_SESSION['username'] ?? 'Admin'; ?></h4>
@@ -315,38 +312,40 @@ require_once "db_connection.php";
                 <button id="editUserBtn" class="edit-btn" disabled>Edit Selected User</button>
                 <button id="deleteUserBtn" class="delete-btn" disabled>Delete Selected User</button>
                 
-                <table id="usersTable" class="user-table">
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Phone Number</th>
-                            <th>Role</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        // Fetch all users from the database
-                        $sql = "SELECT UserID, Username, Email, PhoneNumber, Role FROM users";
-                        $result = $conn->query($sql);
-                        
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr data-id='" . $row["UserID"] . "'>";
-                                echo "<td>" . $row["UserID"] . "</td>";
-                                echo "<td>" . htmlspecialchars($row["Username"]) . "</td>";
-                                echo "<td>" . htmlspecialchars($row["Email"]) . "</td>";
-                                echo "<td>" . htmlspecialchars($row["PhoneNumber"] ?? 'Not provided') . "</td>";
-                                echo "<td>" . htmlspecialchars($row["Role"]) . "</td>";
-                                echo "</tr>";
+                <div class="table-responsive">
+                    <table id="usersTable" class="table table-striped table-bordered user-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Fetch all users from the database
+                            $sql = "SELECT UserID, Username, Email, PhoneNumber, Role FROM users";
+                            $result = $conn->query($sql);
+                            
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    echo "<tr data-id='" . $row["UserID"] . "'>";
+                                    echo "<td>" . $row["UserID"] . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["Username"]) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["Email"]) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["PhoneNumber"] ?? 'Not provided') . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["Role"]) . "</td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='5'>No users found</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='5'>No users found</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
                 
                 <!-- Edit User Modal -->
                 <div id="editUserModal" class="modal">

@@ -147,6 +147,64 @@ $category_result = $conn->query($category_query);
             transition: 0.3s;
         }
         
+        /* Profile Dropdown Styles */
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            z-index: 1100;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .profile-dropdown:before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            transform: rotate(45deg);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: #555;
+        }
+        
+        .dropdown-item:first-child {
+            border-bottom: 1px solid #eee;
+            pointer-events: none;
+        }
+        
         .profile-circle {
             width: 40px;
             height: 40px;
@@ -160,6 +218,10 @@ $category_result = $conn->query($category_query);
             border-radius: 50%;
             text-transform: uppercase;
             cursor: pointer;
+        }
+        
+        .profile-dropdown.show {
+            display: block;
         }
 
         /* Order Confirmation Specific Styles */
@@ -180,7 +242,7 @@ $category_result = $conn->query($category_query);
     </style>
 </head>
 <body>
-    <header>
+<header>
         <div class="running-text">
             <span>Welcome to The Accents Clothing! Enjoy our latest collection with free shipping.</span>
         </div>
@@ -190,28 +252,43 @@ $category_result = $conn->query($category_query);
             </div>
             <div class="nav-links">
                 <a href="shop_customer.php">Shop</a>
-                <?php if ($category_result && $category_result->num_rows > 0) : 
-                    while ($row = $category_result->fetch_assoc()) : 
-                        $category = htmlspecialchars($row['category_name']); ?>
-                        <a href="shop_customer.php?category=<?= $category ?>"><?= $category ?></a>
-                    <?php endwhile; 
-                endif; ?>
+                <?php
+                // Fetch categories for navigation
+                $category_query = "SELECT category_name FROM categories";
+                $category_result = $conn->query($category_query);
+                
+                if ($category_result && $category_result->num_rows > 0) {
+                    while ($row = $category_result->fetch_assoc()) {
+                        $category = htmlspecialchars($row['category_name']); 
+                        echo "<a href='shop_customer.php?category=$category'>$category</a>";
+                    }
+                }
+                ?>
             </div>
-            <div class="user-links">
-                <?php if ($username !== "Guest") : ?>
+                <div class="user-links">
                     <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="notifications.php"><i class="fas fa-bell"></i></a>
-                    <div class="profile-circle">
-                        <?= strtoupper(substr($username, 0, 1)) ?>
+                    <div class="profile-container">
+                        <div class="profile-circle" id="profileToggle">
+                            <?php echo strtoupper(substr($username, 0, 1)); ?>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span><?php echo htmlspecialchars($username); ?></span>
+                            </div>
+                            <a href="<?php echo $username !== 'Guest' ? 'order_users.php' : 'login.php'; ?>" class="dropdown-item">
+                                <i class="fas fa-box"></i>
+                                <span>My Orders</span>
+                            </a>
+                            <?php if ($username !== 'Guest') : ?>
+                                <a href="logout.php" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <a href="logout.php" style="font-size: 14px; color: black;">Logout</a>
-                <?php else : ?>
-                    <a href="login.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="login.php"><i class="fas fa-bell"></i></a>
-                    <a href="signup.php" style="font-size: 14px;">Sign Up</a>
-                    <a href="login.php" style="font-size: 14px;">Login</a>
-                <?php endif; ?>
-            </div>
+                </div>
         </nav>
     </header>
 

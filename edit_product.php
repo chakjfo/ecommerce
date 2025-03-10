@@ -307,7 +307,7 @@ $productImages = json_decode($product['images'], true) ?: [];
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
+                        <span></span>
                     </button>
                     <div>
                         <h4>Welcome, <?php echo $_SESSION['Username'] ?? 'Admin'; ?></h4>

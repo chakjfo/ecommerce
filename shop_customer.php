@@ -443,9 +443,11 @@ nav {
             <span>Welcome to The Accents Clothing! Enjoy our latest collection with free shipping.</span>
         </div>
         <nav>
-            <div class="logo">
-                <a href="homepage.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
-            </div>
+        <div class="logo">
+    <a href="<?php echo ($username !== 'Guest') ? 'shop_customer.php' : 'homepage.php'; ?>">
+        <img src="images/the_accents_logo.png" alt="The Accents Logo">
+    </a>
+</div>
             <div class="nav-links">
                 <a href="shop_customer.php">Shop</a>
                 <?php
@@ -458,30 +460,41 @@ nav {
                 ?>
             </div>
             <div class="user-links">
-                <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                <a href="notifications.php"><i class="fas fa-bell"></i></a>
-                <div class="profile-container">
-                    <div class="profile-circle" id="profileToggle">
-                        <?php echo strtoupper(substr($username, 0, 1)); ?>
-                    </div>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span><?php echo htmlspecialchars($username); ?></span>
-                        </div>
-                        <a href="<?php echo $username !== 'Guest' ? 'order_users.php' : 'login.php'; ?>" class="dropdown-item">
-                            <i class="fas fa-box"></i>
-                            <span>My Orders</span>
-                        </a>
-                        <?php if ($username !== 'Guest') : ?>
-                            <a href="logout.php" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
+    <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+    <div class="profile-container">
+        <div class="profile-circle" id="profileToggle">
+            <?php echo strtoupper(substr($username, 0, 1)); ?>
+        </div>
+        <div class="profile-dropdown" id="profileDropdown">
+            <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span><?php echo htmlspecialchars($username); ?></span>
             </div>
+            <?php if ($username == 'Guest') : ?>
+                <!-- Show Login and Sign up links only for guests -->
+                <a href="login.php" class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    <span>Login</span>
+                </a>
+                <a href="signup.php" class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    <span>Sign up</span>
+                </a>
+            <?php endif; ?>
+            <?php if ($username !== 'Guest') : ?>
+                <!-- Show My Orders and Logout links only for logged-in users -->
+                <a href="orders.php" class="dropdown-item">
+                    <i class="fas fa-box"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="logout.php" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
         </nav>
     </header>
 
@@ -738,6 +751,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-});</script>
+});
+</script>
 </body>
 </html>

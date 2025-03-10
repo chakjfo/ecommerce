@@ -23,7 +23,6 @@ $cart_result = mysqli_query($conn, $cart_query);
 
 // Calculate cart totals
 $subtotal = 0;
-$shipping = 0; // You can set a shipping cost or logic here
 $tax_rate = 0.08; // 8% tax rate
 $tax = 0;
 $total = 0;
@@ -307,6 +306,60 @@ $category_result = $conn->query($category_query);
     right: 20px;
     position: absolute;
 }
+/* Profile Dropdown Styles */
+.profile-container {
+    position: relative;
+    display: inline-block;
+}
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 10px 0;
+    z-index: 1100;
+    margin-top: 8px;
+    display: none;
+}
+.profile-dropdown:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: #555;
+}
+.dropdown-item:first-child {
+    border-bottom: 1px solid #eee;
+    pointer-events: none;
+}
+.profile-dropdown.show {
+    display: block;
+}
 
         /* Buttons */
         .cart-buttons {
@@ -393,21 +446,38 @@ $category_result = $conn->query($category_query);
                 flex-direction: column;
                 gap: 10px;
             }
+            .remove-item {
+    color: #ff0000;
+    cursor: pointer;
+    font-size: 20px;
+    position: absolute;
+    right: 20px;
+    padding: 10px; /* Add padding to increase clickable area */
+    z-index: 10; /* Ensure it's above other elements */
+}
+
+.remove-item:hover {
+    color: #cc0000; /* Darker red on hover */
+}
         }
     </style>
 </head>
 <body>
-    <header>
+<header>
         <div class="running-text">
             <span>Welcome to The Accents Clothing! Enjoy our latest collection with free shipping.</span>
         </div>
         <nav>
             <div class="logo">
-                <a href="homepage.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
+                <a href="shop_customer.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
             </div>
             <div class="nav-links">
                 <a href="shop_customer.php">Shop</a>
                 <?php
+                // Fetch categories for navigation
+                $category_query = "SELECT category_name FROM categories";
+                $category_result = $conn->query($category_query);
+                
                 if ($category_result && $category_result->num_rows > 0) {
                     while ($row = $category_result->fetch_assoc()) {
                         $category = htmlspecialchars($row['category_name']); 
@@ -416,14 +486,30 @@ $category_result = $conn->query($category_query);
                 }
                 ?>
             </div>
-            <div class="user-links">
-                <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                <a href="notifications.php"><i class="fas fa-bell"></i></a>
-                <div class="profile-circle">
-                    <?php echo strtoupper(substr($username, 0, 1)); ?>
+                <div class="user-links">
+                    <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+                    <div class="profile-container">
+                        <div class="profile-circle" id="profileToggle">
+                            <?php echo strtoupper(substr($username, 0, 1)); ?>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span><?php echo htmlspecialchars($username); ?></span>
+                            </div>
+                            <a href="<?php echo $username !== 'Guest' ? 'order_users.php' : 'login.php'; ?>" class="dropdown-item">
+                                <i class="fas fa-box"></i>
+                                <span>My Orders</span>
+                            </a>
+                            <?php if ($username !== 'Guest') : ?>
+                                <a href="logout.php" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
-                <a href="logout.php" style="font-size: 14px; color: black;">Logout</a>
-            </div>
         </nav>
     </header>
 
@@ -442,13 +528,11 @@ $category_result = $conn->query($category_query);
                     $item_subtotal = $item['Price'] * $item['quantity'];
                     $subtotal += $item_subtotal;
                 ?>
-                <!-- Add data-price and data-quantity attributes to the cart item div -->
-<div class="cart-item" data-id="<?= (int)$item['id'] ?>" 
-     data-price="<?= $item['Price'] ?>" 
-     data-quantity="<?= $item['quantity'] ?>">
-    <!-- Change this line in the cart item -->
-<input type="checkbox" class="item-checkbox" value="<?= (int)$item['id'] ?>" checked>
-    <img src="<?= htmlspecialchars($first_image) ?>" alt="<?= htmlspecialchars($item['ProductName']) ?>" class="cart-item-image">
+                <div class="cart-item" data-id="<?= (int)$item['id'] ?>" 
+                     data-price="<?= $item['Price'] ?>" 
+                     data-quantity="<?= $item['quantity'] ?>">
+                    <input type="checkbox" class="item-checkbox" value="<?= (int)$item['id'] ?>" checked>
+                    <img src="<?= htmlspecialchars($first_image) ?>" alt="<?= htmlspecialchars($item['ProductName']) ?>" class="cart-item-image">
                     <div class="cart-item-details">
                         <h3 class="cart-item-name"><?= htmlspecialchars($item['ProductName']) ?></h3>
                         <p class="cart-item-meta">Size: <?= htmlspecialchars($item['size']) ?></p>
@@ -457,9 +541,9 @@ $category_result = $conn->query($category_query);
                     
                     <div class="cart-item-controls">
                         <div class="quantity-control">
-                            <button class="quantity-btn decrease-btn" onclick="updateQuantity(<?= (int)$item['id'] ?>, -1)">-</button>
-                            <input type="number" class="quantity-input" value="<?= (int)$item['quantity'] ?>" min="1" onchange="updateQuantityInput(<?= (int)$item['id'] ?>, this.value)">
-                            <button class="quantity-btn increase-btn" onclick="updateQuantity(<?= (int)$item['id'] ?>, 1)">+</button>
+                            <button class="quantity-btn decrease-btn" data-id="<?= (int)$item['id'] ?>">-</button>
+                            <input type="number" class="quantity-input" value="<?= (int)$item['quantity'] ?>" min="1" data-id="<?= (int)$item['id'] ?>">
+                            <button class="quantity-btn increase-btn" data-id="<?= (int)$item['id'] ?>">+</button>
                         </div>
                     </div>
                     
@@ -467,7 +551,7 @@ $category_result = $conn->query($category_query);
                         $<?= number_format($item_subtotal, 2) ?>
                     </div>
                     
-                    <i class="fas fa-trash remove-item" onclick="removeItem(<?= (int)$item['id'] ?>)"></i>
+                    <i class="fas fa-trash remove-item" data-id="<?= (int)$item['id'] ?>"></i>
                 </div>
                 <?php endwhile; ?>
             </div>
@@ -475,33 +559,31 @@ $category_result = $conn->query($category_query);
             <?php
             // Calculate final totals
             $tax = $subtotal * $tax_rate;
-            $total = $subtotal + $tax + $shipping;
+            $total = $subtotal + $tax;
             ?>
             
-            <!-- Update the summary section to use dynamic IDs -->
-<div class="cart-summary">
-    <div class="summary-row">
-        <span>Subtotal:</span>
-        <span id="summary-subtotal">$0.00</span>
-    </div>
-    <div class="summary-row">
-        <span>Tax (8%):</span>
-        <span id="summary-tax">$0.00</span>
-    </div>
-    <div class="summary-row">
-        <span>Shipping:</span>
-        <span id="summary-shipping">Free</span>
-    </div>
-    <div class="summary-row total">
-        <span>Total:</span>
-        <span id="summary-total">$0.00</span>
-    </div>
-</div>
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (8%):</span>
+                    <span id="summary-tax">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping:</span>
+                    <span id="summary-shipping">Free</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+            </div>
             
             <div class="cart-buttons">
                 <button class="continue-shopping" onclick="window.location.href='shop_customer.php'">Continue Shopping</button>
-                <!-- Change the button to remove the inline onclick -->
-<button class="proceed-checkout">Proceed to Checkout</button>
+                <button class="proceed-checkout" id="proceedToCheckoutBtn">Proceed to Checkout</button>
             </div>
             
         <?php else: ?>
@@ -515,30 +597,179 @@ $category_result = $conn->query($category_query);
     </div>
 
     <script>
-        // Update quantity
-        function updateQuantity(cartId, change) {
-            const quantityInput = document.querySelector(`.cart-item[data-id="${cartId}"] .quantity-input`);
-            let newQuantity = parseInt(quantityInput.value) + change;
+        // Profile Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
             
-            // Ensure quantity is at least 1
-            if (newQuantity < 1) newQuantity = 1;
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (profileDropdown.classList.contains('show') && !profileDropdown.contains(e.target) && e.target !== profileToggle) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
             
-            updateCartItem(cartId, newQuantity);
+            // Cart functionality - initialize quantity buttons
+            const decreaseBtns = document.querySelectorAll('.decrease-btn');
+            const increaseBtns = document.querySelectorAll('.increase-btn');
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            const removeButtons = document.querySelectorAll('.remove-item');
+            const checkoutButton = document.getElementById('proceedToCheckoutBtn');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            // Initialize decrease buttons
+            if (decreaseBtns) {
+                decreaseBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const cartId = this.getAttribute('data-id');
+                        const input = document.querySelector(`.quantity-input[data-id="${cartId}"]`);
+                        const currentValue = parseInt(input.value);
+                        if (currentValue > 0) {
+    // Update cart item with new quantity
+    updateCartItem(cartId, currentValue - 1);
+    
+    // Disable proceed to checkout button if quantity becomes zero
+    if (currentValue - 1 === 0) {
+        const checkoutButton = document.getElementById('proceedToCheckoutBtn');
+        if (checkoutButton) {
+            checkoutButton.disabled = true;
+            checkoutButton.style.opacity = '0.5';
+            checkoutButton.style.cursor = 'not-allowed';
         }
-        
-        // Update quantity from input
-        function updateQuantityInput(cartId, value) {
-            let newQuantity = parseInt(value);
+    }
+}
+                    });
+                });
+            }
             
-            // Ensure quantity is at least 1
-            if (newQuantity < 1 || isNaN(newQuantity)) newQuantity = 1;
+            // Initialize increase buttons
+            if (increaseBtns) {
+                increaseBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const cartId = this.getAttribute('data-id');
+                        const input = document.querySelector(`.quantity-input[data-id="${cartId}"]`);
+                        const currentValue = parseInt(input.value);
+                        updateCartItem(cartId, currentValue + 1);
+                    });
+                });
+            }
             
-            updateCartItem(cartId, newQuantity);
-        }
+            // Initialize quantity inputs
+            if (quantityInputs) {
+                quantityInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        const cartId = this.getAttribute('data-id');
+                        let newValue = parseInt(this.value);
+                        if (isNaN(newValue) || newValue < 1) {
+                            newValue = 1;
+                            this.value = 1;
+                        }
+                        updateCartItem(cartId, newValue);
+                    });
+                });
+            }
+            
+// Initialize remove buttons
+if (removeButtons) {
+    removeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cartId = this.getAttribute('data-id');
+            removeItem(cartId);
+        });
+    });
+}
+
+function removeItem(cartId) {
+    if (confirm('Are you sure you want to remove this item from your cart?')) {
+        // Use fetch API with proper error handling
+        fetch('remove_from_cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add CSRF token if you have one
+            },
+            body: JSON.stringify({
+                cartId: cartId
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remove the item from the DOM without reloading
+                const itemElement = document.querySelector(`.cart-item[data-id="${cartId}"]`);
+                if (itemElement) {
+                    itemElement.remove();
+                    
+                    // Recalculate totals
+                    calculateTotals();
+                    
+                    // Check if cart is now empty
+                    const remainingItems = document.querySelectorAll('.cart-item');
+                    if (remainingItems.length === 0) {
+                        // Reload page to show empty cart message
+                        location.reload();
+                    }
+                }
+            } else {
+                alert(data.message || 'Failed to remove item from cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error removing item:', error);
+            alert('An error occurred while removing the item. Please try again.');
+        });
+    }
+}
+            
+            // Initialize checkout button
+            if (checkoutButton) {
+                checkoutButton.addEventListener('click', proceedToCheckout);
+            }
+            
+            // Initialize checkboxes
+            if (checkboxes) {
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', calculateTotals);
+                });
+            }
+            
+            // Initial calculation if there are items
+            if (document.querySelector('.cart-items')) {
+                calculateTotals();
+            }
+        });
         
         // Send AJAX request to update cart
         function updateCartItem(cartId, quantity) {
-            document.querySelector(`.cart-item[data-id="${cartId}"]`).dataset.quantity = quantity;
+            const itemElement = document.querySelector(`.cart-item[data-id="${cartId}"]`);
+            const quantityInput = document.querySelector(`.quantity-input[data-id="${cartId}"]`);
+            const pricePerItem = parseFloat(itemElement.dataset.price);
+            
+            // Update display values immediately for better UX
+            quantityInput.value = quantity;
+            itemElement.dataset.quantity = quantity;
+            
+            // Update subtotal display
+            const subtotalElement = itemElement.querySelector('.cart-item-subtotal');
+            const newSubtotal = pricePerItem * quantity;
+            subtotalElement.textContent = `$${newSubtotal.toFixed(2)}`;
+            
+            // Calculate totals
+            calculateTotals();
+            
+            // Send the update to the server
             fetch('update_cart.php', {
                 method: 'POST',
                 headers: {
@@ -551,45 +782,39 @@ $category_result = $conn->query($category_query);
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Update data attribute and recalculate
-        document.querySelector(`.cart-item[data-id="${cartId}"]`).dataset.quantity = quantity;
-        calculateTotals();
-    } else {
-        alert(data.message || 'Failed to update cart');
-    }
-})
+                if (!data.success) {
+                    console.error(data.message || 'Failed to update cart');
+                    alert(data.message || 'Failed to update cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart:', error);
+            });
         }
         
         function calculateTotals() {
-    let subtotal = 0;
-    const taxRate = 0.08;
-    const shipping = 0;
-
-    document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
-        const item = checkbox.closest('.cart-item');
-        const price = parseFloat(item.dataset.price);
-        const quantity = parseInt(item.dataset.quantity);
-        subtotal += price * quantity;
-    });
-
-    const tax = subtotal * taxRate;
-    const total = subtotal + tax + shipping;
-
-    // Update displayed totals
-    document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
-    document.getElementById('summary-tax').textContent = `$${tax.toFixed(2)}`;
-    document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
-}
-
-// Add event listeners
-document.querySelectorAll('.item-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', calculateTotals);
-});
-
-// Initial calculation
-calculateTotals();
-
+            let subtotal = 0;
+            const taxRate = 0.08;
+            
+            document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+                const cartId = checkbox.value;
+                const item = document.querySelector(`.cart-item[data-id="${cartId}"]`);
+                if (item) {
+                    const price = parseFloat(item.dataset.price);
+                    const quantity = parseInt(item.dataset.quantity);
+                    subtotal += price * quantity;
+                }
+            });
+            
+            const tax = subtotal * taxRate;
+            const total = subtotal + tax;
+            
+            // Update displayed totals
+            document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('summary-tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
+        }
+        
         function removeItem(cartId) {
             if (confirm('Are you sure you want to remove this item from your cart?')) {
                 fetch('remove_from_cart.php', {
@@ -604,8 +829,21 @@ calculateTotals();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Reload page to reflect changes
-                        location.reload();
+                        // Remove the item from the DOM without reloading
+                        const itemElement = document.querySelector(`.cart-item[data-id="${cartId}"]`);
+                        if (itemElement) {
+                            itemElement.remove();
+                            
+                            // Recalculate totals
+                            calculateTotals();
+                            
+                            // Check if cart is now empty
+                            const remainingItems = document.querySelectorAll('.cart-item');
+                            if (remainingItems.length === 0) {
+                                // Reload page to show empty cart message
+                                location.reload();
+                            }
+                        }
                     } else {
                         alert(data.message || 'Failed to remove item from cart');
                     }
@@ -616,34 +854,28 @@ calculateTotals();
                 });
             }
         }
-
-        // Add this new function to your <script> section
-function proceedToCheckout() {
-    const selectedItems = Array.from(document.querySelectorAll('.item-checkbox:checked'))
-                              .map(checkbox => checkbox.value);
-    
-    if (selectedItems.length === 0) {
-        alert('Please select at least one item to proceed to checkout.');
-        return;
+            // Directly attach event listeners to all trash icons
+            document.querySelector('.cart-items').addEventListener('click', function(e) {
+    if (e.target.classList.contains('fa-trash') || 
+        (e.target.classList.contains('remove-item') && e.target.classList.contains('fas'))) {
+        const cartId = e.target.getAttribute('data-id');
+        console.log('Remove item clicked via delegation, ID:', cartId);
+        removeItem(cartId);
     }
-    
-    window.location.href = `checkout.php?selected_items=${selectedItems.join(',')}`;
-}
-
-// Add this at the end of your script section
-// Change the DOMContentLoaded handler to
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize checkboxes
-    document.querySelectorAll('.item-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', calculateTotals);
-    });
-    
-    // Initial calculation
-    calculateTotals();
-    
-    // Add click handler for checkout button
-    document.querySelector('.proceed-checkout').addEventListener('click', proceedToCheckout);
 });
+
+
+        function proceedToCheckout() {
+            const selectedItems = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                                  .map(checkbox => checkbox.value);
+            
+            if (selectedItems.length === 0) {
+                alert('Please select at least one item to proceed to checkout.');
+                return;
+            }
+            
+            window.location.href = `checkout.php?selected_items=${selectedItems.join(',')}`;
+        }
     </script>
 </body>
 </html>

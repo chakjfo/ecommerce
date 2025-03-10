@@ -148,9 +148,9 @@
             <a href="homepage.php"><img src="images/the_accents_logo.png"></a>
             <div class="nav-links" id="navLinks">
                 <ul>
-                    <li><a href="shop_customer.php">SHOP</a></li>
-                    <li><a href="aboutus.php">ABOUT US</a></li>
-                    <li><a href="contactus.php">CONTACT US</a></li>
+                    <li><a href="homepage.php">SHOP</a></li>
+                    <li><a href="homepage.php#about">ABOUT US</a></li>
+                    <li><a href="homepage.php#contact">CONTACT US</a></li>
                     <li><a href="login.php">LOG IN</a></li>
                     <li><a href="signup.php">SIGN UP</a></li>
                 </ul>

@@ -7,15 +7,52 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
 $username = htmlspecialchars($_SESSION['username']);
 $user_id = $_SESSION['user_id'];
-$query = "SELECT * FROM customer_orders WHERE customer_name = ? ORDER BY order_date DESC";
+
+// Updated query to match your database structure
+$query = "SELECT o.OrderID, o.OrderDate, o.TotalAmount, o.delivery_status, 
+          o.shipping_address AS address, o.payment_method, 
+          co.product_id, co.quantity, p.ProductName, p.Price, p.sizes 
+          FROM orders o 
+          LEFT JOIN customer_orders co ON o.OrderID = co.order_id 
+          LEFT JOIN products p ON co.product_id = p.ProductName 
+          WHERE o.UserID = ? 
+          ORDER BY o.OrderDate DESC";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("s", $username); // Assuming username matches customer_name in your table
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Organize orders by OrderID
+$orders = [];
+while ($row = $result->fetch_assoc()) {
+    $orderId = $row['OrderID'];
+    
+    if (!isset($orders[$orderId])) {
+        // Initialize order
+        $orders[$orderId] = [
+            'order_id' => $orderId,
+            'order_date' => $row['OrderDate'],
+            'TotalAmount' => $row['TotalAmount'],
+            'delivery_status' => $row['delivery_status'],
+            'address' => $row['address'],
+            'payment_method' => $row['payment_method'],
+            'items' => []
+        ];
+    }
+    
+    // Add items to order
+    if ($row['product_id']) {
+        $orders[$orderId]['items'][] = [
+            'ProductName' => $row['ProductName'],
+            'Size' => $row['sizes'],
+            'Quantity' => $row['quantity'],
+            'Price' => $row['Price']
+        ];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -228,6 +265,7 @@ $result = $stmt->get_result();
         .page-title {
             text-align: center;
             margin-bottom: 30px;
+            margin-top: -100px;
             font-size: 32px;
             text-transform: uppercase;
         }
@@ -387,7 +425,7 @@ $result = $stmt->get_result();
         </div>
         <nav>
             <div class="logo">
-                <a href="homepage.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
+                <a href="shop)customer.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
             </div>
             <div class="nav-links">
                 <a href="shop_customer.php">Shop</a>
@@ -406,7 +444,6 @@ $result = $stmt->get_result();
             </div>
                 <div class="user-links">
                     <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="notifications.php"><i class="fas fa-bell"></i></a>
                     <div class="profile-container">
                         <div class="profile-circle" id="profileToggle">
                             <?php echo strtoupper(substr($username, 0, 1)); ?>
@@ -432,44 +469,108 @@ $result = $stmt->get_result();
         </nav>
     </header>
 
+    <?php 
+session_start();
+require 'db_connection.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$username = htmlspecialchars($_SESSION['username']);
+$user_id = $_SESSION['user_id'];
+
+// Updated query to match your database structure
+$query = "SELECT o.OrderID, o.OrderDate, o.TotalAmount, o.delivery_status, 
+          o.shipping_address AS address, o.payment_method, 
+          co.product_id, co.quantity, p.ProductName, p.Price, p.sizes 
+          FROM orders o 
+          LEFT JOIN customer_orders co ON o.OrderID = co.order_id 
+          LEFT JOIN products p ON co.product_id = p.ProductID
+          WHERE o.UserID = ? 
+          ORDER BY o.OrderDate DESC";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Organize orders by OrderID
+$orders = [];
+while ($row = $result->fetch_assoc()) {
+    $orderId = $row['OrderID'];
+    
+    if (!isset($orders[$orderId])) {
+        // Initialize order
+        $orders[$orderId] = [
+            'order_id' => $orderId,
+            'order_date' => $row['OrderDate'],
+            'TotalAmount' => $row['TotalAmount'],
+            'delivery_status' => $row['delivery_status'],
+            'address' => $row['address'],
+            'payment_method' => $row['payment_method'],
+            'items' => []
+        ];
+    }
+    
+    // Add items to order
+    if ($row['product_id']) {
+        $orders[$orderId]['items'][] = [
+            'ProductName' => $row['ProductName'],
+            'Size' => $row['sizes'],
+            'Quantity' => $row['quantity'],
+            'Price' => $row['Price']
+        ];
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - The Accents Clothing</title>
+    <!-- Your CSS links and other head elements here -->
+</head>
+<body>
+    <header>
+        <!-- Header content here -->
+    </header>
+
     <div class="container">
         <h1 class="page-title">My Orders</h1>
         
-        <?php if ($result->num_rows > 0) : ?>
+        <?php if (!empty($orders)) : ?>
             <div class="orders-container">
-                <?php while ($order = $result->fetch_assoc()) : ?>
+                <?php foreach ($orders as $order) : ?>
                     <div class="order-card">
                         <div class="order-header">
                             <div class="order-number">Order #<?= $order['order_id'] ?></div>
                             <div class="order-date">
                                 <?= date('F j, Y', strtotime($order['order_date'])) ?>
                             </div>
-                            <div class="order-status <?= strtolower($order['delivery_status']) ?>">
+                            <div class="order-status status-<?= strtolower($order['delivery_status']) ?>">
                                 <?= htmlspecialchars($order['delivery_status']) ?>
                             </div>
                         </div>
                         
                         <div class="order-items">
-                            <?php 
-                                $order['items'] = '[' . $order['items'] . ']'; // Make it a valid JSON array
-                                $items = json_decode($order['items'], true); // Convert to PHP array                                
-                                if (!empty($items)) :
-                                    foreach ($items as $item) :
-                            ?>
-                                <div class="order-item">
-                                    <div class="item-details">
-                                        <div class="item-name"><?= htmlspecialchars($item['ProductName']) ?></div>
-                                        <div class="item-meta">
-                                            Size: <?= htmlspecialchars($item['Size']) ?> | 
-                                            Qty: <?= (int)$item['Quantity'] ?>
+                            <?php if (!empty($order['items'])) : ?>
+                                <?php foreach ($order['items'] as $item) : ?>
+                                    <div class="order-item">
+                                        <div class="item-details">
+                                            <div class="item-name"><?= htmlspecialchars($item['ProductName']) ?></div>
+                                            <div class="item-meta">
+                                                Size: <?= htmlspecialchars($item['Size']) ?> | 
+                                                Qty: <?= (int)$item['Quantity'] ?>
+                                            </div>
                                         </div>
+                                        <div class="item-price">$<?= number_format($item['Price'], 2) ?></div>
                                     </div>
-                                    <div class="item-price">$<?= number_format($item['Price'], 2) ?></div>
-                                </div>
-                            <?php 
-                                    endforeach;
-                                else:
-                            ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
                                 <p>No item details available</p>
                             <?php endif; ?>
                         </div>
@@ -484,7 +585,7 @@ $result = $stmt->get_result();
                             </div>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </div>
         <?php else: ?>
             <div class="no-orders">

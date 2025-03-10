@@ -201,7 +201,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="shop_customer.php">SHOP</a>
+                        <a class="nav-link" href="homepage.php">SHOP</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#about">ABOUT US</a>
@@ -239,7 +239,6 @@
                     <h2 class="section-title">About The Accents</h2>
                     <p>Founded with a vision to celebrate individuality, The Accents Clothing stands as a testament to the rich tapestry of human expression. We believe fashion is more than just clothing—it's a language through which we communicate our identity to the world.</p>
                     <p>Our collections are inspired by various subcultures, movements, and artistic expressions that have shaped modern society. Each piece tells a story, carries a history, and adds an accent to your personal style narrative.</p>
-                    <a href="#" class="btn btn-dark mt-3">Learn More</a>
                 </div>
                 <div class="col-lg-6">
                     <div class="image-container">

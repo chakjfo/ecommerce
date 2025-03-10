@@ -219,9 +219,6 @@ $products = $conn->query($query);
                         <li>
                             <a href="orders.php">View All Orders</a>
                         </li>
-                        <li>
-                            <a href="order_details.php">Order Details</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -236,7 +233,7 @@ $products = $conn->query($query);
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
+                        <span></span>
                     </button>
                     <div>
                         <h4>Welcome, <?php echo $_SESSION['Username'] ?? 'Admin'; ?></h4>

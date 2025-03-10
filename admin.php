@@ -187,7 +187,7 @@ if ($result->num_rows === 1) {
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
+                        <span></span>
                     </button>
                     <div>
                         <h4>Welcome, <?php echo $_SESSION['Username'] ?? 'Admin'; ?></h4>
@@ -311,7 +311,7 @@ if ($result->num_rows === 1) {
                                                 echo "<td>" . date('M d, Y', strtotime($order['OrderDate'])) . "</td>";
                                                 echo "<td>$" . number_format($order['TotalAmount'], 2) . "</td>";
                                                 echo "<td>
-                                                    <a href='view_order.php?id=" . $order['OrderID'] . "' class='btn btn-sm btn-info'>View</a>
+                                                    <a href='orders.php?id=" . $order['OrderID'] . "' class='btn btn-sm btn-info'>View</a>
                                                 </td>";
                                                 echo "</tr>";
                                             }
