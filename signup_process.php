@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if passwords match
     if ($password !== $confirm_password) {
-        echo "<script>alert('Passwords do not match!'); window.location.href='signup.php';</script>";
+        echo "<script>alert('Passwords do not match!'); window.location.href='sighomepage.php';</script>";
         exit();
     }
 
@@ -21,14 +21,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssss", $username, $hashed_password, $phone, $email, $role);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Signup successful! You can now log in.'); window.location.href='login.php';</script>";
+        echo "<script>alert('Signup successful! You can now log in.'); window.location.href='homepage.php';</script>";
     } else {
-        echo "<script>alert('Error: Unable to register.'); window.location.href='signup.php';</script>";
+        echo "<script>alert('Error: Unable to register.'); window.location.href='homepage.php';</script>";
     }
 
     $stmt->close();
     $conn->close();
 } else {
-    echo "<script>alert('Invalid request.'); window.location.href='signup.php';</script>";
+    echo "<script>alert('Invalid request.'); window.location.href='homepage.php';</script>";
 }
 ?>
