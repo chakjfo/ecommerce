@@ -2,7 +2,7 @@
 // delete_user.php
 
 session_start();
-if (!isset($_SESSION['username']) {
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }

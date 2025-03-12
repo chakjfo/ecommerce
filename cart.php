@@ -551,7 +551,7 @@ $category_result = $conn->query($category_query);
                         $<?= number_format($item_subtotal, 2) ?>
                     </div>
                     
-                    <i class="fas fa-trash remove-item" data-id="<?= (int)$item['id'] ?>"></i>
+                    <i class="fas fa-trash remove-item" data-id="<?= (int)$item['id'] ?>" onclick="removeItem(<?= (int)$item['id'] ?>)"></i>
                 </div>
                 <?php endwhile; ?>
             </div>
@@ -673,39 +673,47 @@ if (removeButtons) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize remove buttons
+    const removeButtons = document.querySelectorAll('.remove-item');
+    if (removeButtons) {
+        removeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const cartId = this.getAttribute('data-id');
+                removeItem(cartId);
+            });
+        });
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".remove-item").forEach(button => {
+        button.addEventListener("click", function () {
+            let itemId = this.getAttribute("data-id");
+            removeItem(itemId);
+        });
+    });
+});
 function removeItem(cartId) {
     if (confirm('Are you sure you want to remove this item from your cart?')) {
-        // Use fetch API with proper error handling
         fetch('remove_from_cart.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Add CSRF token if you have one
             },
-            body: JSON.stringify({
-                cartId: cartId
-            })
+            body: JSON.stringify({ id: cartId }) // Use 'id' instead of 'cartId'
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 // Remove the item from the DOM without reloading
                 const itemElement = document.querySelector(`.cart-item[data-id="${cartId}"]`);
                 if (itemElement) {
                     itemElement.remove();
-                    
-                    // Recalculate totals
                     calculateTotals();
                     
-                    // Check if cart is now empty
-                    const remainingItems = document.querySelectorAll('.cart-item');
-                    if (remainingItems.length === 0) {
-                        // Reload page to show empty cart message
+                    // Reload page if cart is empty
+                    if (document.querySelectorAll('.cart-item').length === 0) {
                         location.reload();
                     }
                 }
@@ -719,6 +727,7 @@ function removeItem(cartId) {
         });
     }
 }
+
             
             // Initialize checkout button
             if (checkoutButton) {
@@ -847,43 +856,40 @@ function calculateTotals() {
     }
 }
         
-function removeItem(cartId) {
-    fetch('remove_from_cart.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            cartId: cartId
+function removeItem(id) {
+    if (confirm('Are you sure you want to remove this item from your cart?')) {
+        fetch('remove_from_cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: id }) // Use 'id' instead of 'cartId'
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the item from the DOM without reloading
-            const itemElement = document.querySelector(`.cart-item[data-id="${cartId}"]`);
-            if (itemElement) {
-                itemElement.remove();
-
-                // Recalculate totals
-                calculateTotals();
-
-                // Check if cart is now empty
-                const remainingItems = document.querySelectorAll('.cart-item');
-                if (remainingItems.length === 0) {
-                    // Reload page to show empty cart message
-                    location.reload();
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the item from the DOM without reloading
+                const itemElement = document.querySelector(`.cart-item[data-id="${id}"]`);
+                if (itemElement) {
+                    itemElement.remove();
+                    calculateTotals();
+                    
+                    // Reload page if cart is empty
+                    if (document.querySelectorAll('.cart-item').length === 0) {
+                        location.reload();
+                    }
                 }
+            } else {
+                alert(data.message || 'Failed to remove item from cart');
             }
-        } else {
-            alert(data.message || 'Failed to remove item from cart');
-        }
-    })
-    .catch(error => {
-        console.error('Error removing item:', error);
-        alert('An error occurred. Please try again.');
-    });
+        })
+        .catch(error => {
+            console.error('Error removing item:', error);
+            alert('An error occurred while removing the item. Please try again.');
+        });
+    }
 }
+
 
 
         function proceedToCheckout() {

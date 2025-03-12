@@ -2,6 +2,8 @@
 session_start();
 require 'db_connection.php';
 
+header('Content-Type: application/json');
+
 // Ensure only admins can delete orders
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
@@ -24,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Delete from customer_orders table
         $deleteCustomerOrdersQuery = "DELETE FROM customer_orders WHERE order_id = ?";
-        $stmt = $conn->prepare($deleteCustomerOrdersQuery);
-        $stmt->bind_param("i", $orderId);
-        $stmt->execute();
+        $stmt_customer = $conn->prepare($deleteCustomerOrdersQuery);
+        $stmt_customer->bind_param("i", $orderId);
+        $stmt_customer->execute();
 
         // Delete from orders table
         $deleteOrdersQuery = "DELETE FROM orders WHERE OrderID = ?";

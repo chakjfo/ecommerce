@@ -1,38 +1,32 @@
 <?php
-// remove_from_cart.php
 session_start();
 require 'db_connection.php';
 
-// Get JSON data
-$json_data = file_get_contents('php://input');
-$data = json_decode($json_data, true);
+header('Content-Type: application/json');
 
-$response = ['success' => false, 'message' => 'Unknown error'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-if (isset($_SESSION['user_id']) && isset($data['cartId'])) {
-    $user_id = $_SESSION['user_id'];
-    $cart_id = (int)$data['cartId'];
-    
-    // Prepare and execute the delete statement
-    $delete_query = "DELETE FROM cart WHERE id = ? AND user_id = ?";
-    $stmt = $conn->prepare($delete_query);
-    
-    if ($stmt) {
-        $stmt->bind_param("ii", $cart_id, $user_id);
-        if ($stmt->execute()) {
-            $response = ['success' => true, 'message' => 'Item removed successfully'];
-        } else {
-            $response = ['success' => false, 'message' => 'Failed to remove item: ' . $stmt->error];
-        }
-        $stmt->close();
-    } else {
-        $response = ['success' => false, 'message' => 'Failed to prepare statement: ' . $conn->error];
-    }
-} else {
-    $response = ['success' => false, 'message' => 'Invalid request or user not logged in'];
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(["success" => false, "message" => "User not authenticated"]);
+    exit();
 }
 
-// Return JSON response
-header('Content-Type: application/json');
-echo json_encode($response);
+if (isset($data['id'])) {
+    $cart_id = (int)$data['id']; // Use 'id' instead of 'cartId'
+    $user_id = $_SESSION['user_id'];
+
+    // Ensure the item belongs to the user
+    $query = "DELETE FROM cart WHERE id = ? AND user_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ii", $cart_id, $user_id);
+
+    if ($stmt->execute()) {
+        echo json_encode(["success" => true, "message" => "Item removed from cart"]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Failed to remove item"]);
+    }
+    $stmt->close();
+} else {
+    echo json_encode(["success" => false, "message" => "Invalid request"]);
+}
 ?>

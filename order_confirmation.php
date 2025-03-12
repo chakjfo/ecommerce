@@ -445,5 +445,26 @@ $items = $stmt->get_result();
     </div>
 </div>
         </div> 
+        <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (profileToggle && profileDropdown) {
+                // Toggle dropdown when profile circle is clicked
+                profileToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (profileDropdown.classList.contains('show') && !profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+        </script>
 </body>
 </html>
