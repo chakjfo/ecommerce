@@ -33,22 +33,48 @@ if ($result->num_rows === 1) {
     exit();
 }
 
-// Handle Delete Request
-if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
-    $productId = $_GET['delete'];
-    
-    // Get images to delete from filesystem
+function safeDeleteProduct($conn, $productId) {
+    // Check if there are any active orders for this product
+    $orderCheckQuery = "
+        SELECT COUNT(*) as active_orders 
+        FROM customer_orders co
+        JOIN orders o ON co.order_id = o.OrderID
+        WHERE co.product_id = ? 
+        AND o.delivery_status NOT IN ('delivered', 'cancelled')
+    ";
+
+    $checkStmt = $conn->prepare($orderCheckQuery);
+    $checkStmt->bind_param("i", $productId);
+    $checkStmt->execute();
+    $result = $checkStmt->get_result();
+    $orderCount = $result->fetch_assoc()['active_orders'];
+
+    // If there are active orders, don't allow deletion
+    if ($orderCount > 0) {
+        return [
+            'success' => false,
+            'message' => "Cannot delete this product. It has $orderCount active orders that are not yet delivered or cancelled."
+        ];
+    }
+
+    // Delete from customer_orders first
+$deleteOrdersStmt = $conn->prepare("DELETE FROM customer_orders WHERE product_id = ?");
+$deleteOrdersStmt->bind_param("i", $productId);
+$deleteOrdersStmt->execute();
+
+    // Safe to proceed with deletion
+    // 1. Get product images first
     $imageQuery = "SELECT images FROM products WHERE ProductID = ?";
     $imgStmt = $conn->prepare($imageQuery);
     $imgStmt->bind_param("i", $productId);
     $imgStmt->execute();
     $imageResult = $imgStmt->get_result();
-    
+
+    // Delete images from filesystem if they exist
     if ($imageResult->num_rows > 0) {
         $imageRow = $imageResult->fetch_assoc();
         $imagesList = json_decode($imageRow['images'], true);
-        
-        // Delete physical image files
+
         if (is_array($imagesList)) {
             foreach ($imagesList as $imagePath) {
                 if (file_exists($imagePath)) {
@@ -57,15 +83,34 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
             }
         }
     }
-    
-    // Delete the product
+
+    // 2. Delete the product
     $deleteStmt = $conn->prepare("DELETE FROM products WHERE ProductID = ?");
     $deleteStmt->bind_param("i", $productId);
-    
+
     if ($deleteStmt->execute()) {
-        $_SESSION['success_message'] = "Product deleted successfully!";
+        return [
+            'success' => true,
+            'message' => "Product deleted successfully!"
+        ];
     } else {
-        $_SESSION['error_message'] = "Error deleting product: " . $conn->error;
+        return [
+            'success' => false,
+            'message' => "Error deleting product: " . $conn->error
+        ];
+    }
+}
+
+// Handle Delete Request
+if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
+    $productId = $_GET['delete'];
+    
+    $result = safeDeleteProduct($conn, $productId);
+    
+    if ($result['success']) {
+        $_SESSION['success_message'] = $result['message'];
+    } else {
+        $_SESSION['error_message'] = $result['message'];
     }
     
     // Redirect to refresh the page
@@ -317,8 +362,8 @@ $products = $conn->query($query);
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
                                                     <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $product['ProductID']; ?>)" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
+    <i class="fas fa-trash"></i> Delete
+</a>
                                                 </td>
                                             </tr>
                                         <?php endwhile; ?>
@@ -336,24 +381,24 @@ $products = $conn->query($query);
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this product? This action cannot be undone.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
-                </div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this product? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -365,12 +410,12 @@ $products = $conn->query($query);
             });
         });
         
-        // Delete confirmation
-        function confirmDelete(productId) {
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            document.getElementById('confirmDeleteBtn').href = 'products.php?delete=' + productId;
-            deleteModal.show();
-        }
+// This function should be placed in your JavaScript section
+function confirmDelete(productId) {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    document.getElementById('confirmDeleteBtn').href = 'products.php?delete=' + productId;
+    deleteModal.show();
+}
     </script>
 </body>
 </html>

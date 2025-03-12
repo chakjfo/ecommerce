@@ -401,20 +401,152 @@ $category_result = $conn->query($category_query);
                 margin-bottom: 10px;
             }
         }
+        /* Carousel Styles */
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.carousel-inner {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.carousel-control:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.carousel-control.prev {
+    left: 10px;
+}
+
+.carousel-control.next {
+    right: 10px;
+}
+        .profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 10px 0;
+    z-index: 1100;
+    margin-top: 8px;
+    display: none;
+}
+.profile-dropdown:before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: #555;
+}
+.dropdown-item:first-child {
+    border-bottom: 1px solid #eee;
+    pointer-events: none;
+}
+.profile-dropdown.show {
+    display: block;
+}
+/* Zoomed Image Overlay */
+.zoomed-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 3000;
+    text-align: center;
+}
+
+.zoomed-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    margin-top: 5%;
+    border-radius: 10px;
+}
+
+.close-zoom {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.close-zoom:hover {
+    color: #ccc;
+}
     </style>
 </head>
 <body>
-    <header>
+<header>
         <div class="running-text">
             <span>Welcome to The Accents Clothing! Enjoy our latest collection with free shipping.</span>
         </div>
         <nav>
             <div class="logo">
-                <a href="homepage.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
+                <a href="shop_customer.php"><img src="images/the_accents_logo.png" alt="The Accents Logo"></a>
             </div>
             <div class="nav-links">
                 <a href="shop_customer.php">Shop</a>
                 <?php
+                // Fetch categories for navigation
+                $category_query = "SELECT category_name FROM categories";
+                $category_result = $conn->query($category_query);
+                
                 if ($category_result && $category_result->num_rows > 0) {
                     while ($row = $category_result->fetch_assoc()) {
                         $category = htmlspecialchars($row['category_name']); 
@@ -424,36 +556,44 @@ $category_result = $conn->query($category_query);
                 ?>
             </div>
             <div class="user-links">
-                <?php if ($username !== "Guest") : ?>
-                    <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
-                <?php else : ?>
-                    <a href="login.php"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="login.php"><i class="fas fa-bell"></i></a>
-                <?php endif; ?>
-
-                <?php if ($username !== "Guest") : ?>
-                    <div class="profile-circle">
-                        <?php echo strtoupper(substr($username, 0, 1)); ?>
-                    </div>
-                    <a href="logout.php" style="font-size: 14px; color: black;">Logout</a>
-                <?php else : ?>
-                    <a href="signup.php" style="font-size: 14px;">Sign Up</a>
-                    <a href="login.php" style="font-size: 14px;">Login</a>
-                <?php endif; ?>
+    <a href="<?php echo $username !== 'Guest' ? 'cart.php' : 'homepage.php?action=login'; ?>">
+        <i class="fas fa-shopping-cart"></i>
+    </a>
+    <div class="profile-container">
+        <div class="profile-circle" id="profileToggle">
+            <?php echo strtoupper(substr($username, 0, 1)); ?>
+        </div>
+        <div class="profile-dropdown" id="profileDropdown">
+            <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span><?php echo htmlspecialchars($username); ?></span>
             </div>
-        </nav>
+            <a href="<?php echo $username !== 'Guest' ? 'order_users.php' : 'homepage.php?action=login'; ?>" class="dropdown-item">
+                <i class="fas fa-box"></i>
+                <span>My Orders</span>
+            </a>
+            <?php if ($username !== 'Guest') : ?>
+                <a href="logout.php" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
     </header>
 
     <div class="container">
         <?php if (mysqli_num_rows($result) > 0) : ?>
             <?php while ($product = mysqli_fetch_assoc($result)) : ?>
                 <div class='product-card' onclick="openModal(
-                    '<?= (int)$product['ProductID'] ?>',
-                    '<?= htmlspecialchars($product['ProductName']) ?>', 
-                    '<?= htmlspecialchars($product['Description']) ?>', 
-                    '<?= number_format($product['Price'], 2) ?>', 
-                    '<?= htmlspecialchars($product['images']) ?>', 
-                    <?= (int)$product['StockQuantity'] ?>)">
+    '<?= (int)$product['ProductID'] ?>',
+    '<?= htmlspecialchars($product['ProductName']) ?>', 
+    '<?= htmlspecialchars($product['Description']) ?>', 
+    '<?= number_format($product['Price'], 2) ?>', 
+    '<?= htmlspecialchars($product['images']) ?>', 
+    <?= (int)$product['StockQuantity'] ?>)">
                     
                     <div class='image-container'>
                         <?php 
@@ -472,91 +612,160 @@ $category_result = $conn->query($category_query);
         <?php endif; ?>
     </div>
 
-    <!-- Product Modal -->
     <div id="productModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-left">
-                <img id="modalImage" src="" alt="Product Image">
+    <div class="modal-content">
+        <div class="modal-left">
+            <div class="carousel">
+                <div class="carousel-inner" id="carouselInner">
+                    <!-- Images will be dynamically inserted here -->
+                </div>
+                <button class="carousel-control prev" onclick="prevImage()">&#10094;</button>
+                <button class="carousel-control next" onclick="nextImage()">&#10095;</button>
             </div>
-            
-            <div class="modal-right">
-                <h2 id="modalTitle"></h2>
-                <p id="modalDescription" class="modal-description"></p>
-                <p id="modalPrice" class="modal-price"></p>
+        </div>
+        
+        <div class="modal-right">
+            <h2 id="modalTitle"></h2>
+            <p id="modalCategory" class="modal-category"></p>
+            <p id="modalPrice" class="modal-price"></p>
+            <p id="modalStock" class="modal-stock"></p>
 
-                <div class="size-quantity-container">
-                    <div class="control-row">
-                        <div class="control-group">
-                            <label for="sizeSelect">Size:</label>
-                            <select id="sizeSelect">
-                                <option value="S">Small (S)</option>
-                                <option value="M">Medium (M)</option>
-                                <option value="L">Large (L)</option>
-                                <option value="XL">Extra Large (XL)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label for="quantityInput">Quantity:</label>
-                            <input type="number" id="quantityInput" min="1" value="1" oninput="validateQuantity()" />
-                        </div>
+            <div class="size-quantity-container">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="sizeSelect">Size:</label>
+                        <select id="sizeSelect">
+                            <option value="S">Small (S)</option>
+                            <option value="M">Medium (M)</option>
+                            <option value="L">Large (L)</option>
+                            <option value="XL">Extra Large (XL)</option>
+                        </select>
                     </div>
-                    <span id="stockMessage"></span>
+                    
+                    <div class="control-group">
+                        <label for="quantityInput">Quantity:</label>
+                        <input type="number" id="quantityInput" min="1" value="1" oninput="validateQuantity()" />
+                    </div>
                 </div>
+                <span id="stockMessage"></span>
+            </div>
 
-                <!-- Buttons -->
-                <div class="button-container">
-                    <button class="buy-now">Buy Now</button>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
+            <!-- Buttons -->
+            <div class="button-container">
+                <button class="buy-now">Buy Now</button>
+                <button class="add-to-cart">Add to Cart</button>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Zoomed Image Overlay -->
+<div id="zoomedImageOverlay" class="zoomed-overlay">
+    <span class="close-zoom" onclick="closeZoom()">&times;</span>
+    <img id="zoomedImage" src="" alt="Zoomed Image">
+</div>
 
     <script>
+                // Profile Dropdown functionality
+                document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (profileDropdown.classList.contains('show') && !profileDropdown.contains(e.target) && e.target !== profileToggle) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    
         // Global variables for product information
         let currentProductId;
         let currentProductName;
         let currentProductPrice;
         let currentProductImage;
 
-        // Open product modal with details
-        function openModal(productId, name, description, price, imagesJson, stock) {
-            // Store current product information
-            currentProductId = productId;
-            currentProductName = name;
-            currentProductPrice = parseFloat(price);
-            
-            // Set modal content
-            document.getElementById('modalTitle').innerText = name;
-            document.getElementById('modalDescription').innerText = description;
-            document.getElementById('modalPrice').innerText = "$" + price;
+        let currentImageIndex = 0;
 
-            // Parse and set product image
-            let images;
-            try {
-                images = JSON.parse(imagesJson);
-            } catch (error) {
-                console.error("Invalid JSON format for images:", error);
-                images = [];
-            }
+        function openModal(productId, name, category, price, imagesJson, stock) {
+    // Store current product information
+    currentProductId = productId;
+    currentProductName = name;
+    currentProductPrice = parseFloat(price);
 
-            let imageSrc = (Array.isArray(images) && images.length > 0 && images[0]) 
-                ? images[0] 
-                : 'images/default-product.jpg';
-                
-            currentProductImage = imageSrc;
-            document.getElementById('modalImage').src = imageSrc;
+    // Set modal content
+    document.getElementById('modalTitle').innerText = name;
+    document.getElementById('modalCategory').innerText = "Category: " + category;
+    document.getElementById('modalPrice').innerText = "Price: $" + price;
+    document.getElementById('modalStock').innerText = "Stock: " + stock + " items available";
 
-            // Set stock information
-            document.getElementById('quantityInput').setAttribute("max", stock);
-            document.getElementById('quantityInput').value = 1;
-            document.getElementById('stockMessage').style.display = "none";
+    // Parse and set product images
+    let images;
+    try {
+        images = JSON.parse(imagesJson);
+    } catch (error) {
+        console.error("Invalid JSON format for images:", error);
+        images = [];
+    }
 
-            // Show modal
-            document.getElementById('productModal').classList.add('show');
-        }
+    // If no images, use a default image
+    if (!Array.isArray(images) || images.length === 0) {
+        images = ['images/default-product.jpg'];
+    }
 
+    // Clear existing carousel images
+    const carouselInner = document.getElementById('carouselInner');
+    carouselInner.innerHTML = '';
+
+    // Add images to the carousel
+    images.forEach((image, index) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image;
+        imgElement.alt = `${name} - Image ${index + 1}`;
+        carouselInner.appendChild(imgElement);
+    });
+
+    // Reset carousel position
+    currentImageIndex = 0;
+    updateCarousel();
+
+    // Set stock information
+    document.getElementById('quantityInput').setAttribute("max", stock);
+    document.getElementById('quantityInput').value = 1;
+    document.getElementById('stockMessage').style.display = "none";
+
+    // Show modal
+    document.getElementById('productModal').classList.add('show');
+}
+
+function updateCarousel() {
+    const carouselInner = document.getElementById('carouselInner');
+    const offset = -currentImageIndex * 100;
+    carouselInner.style.transform = `translateX(${offset}%)`;
+}
+
+function prevImage() {
+    const carouselInner = document.getElementById('carouselInner');
+    const totalImages = carouselInner.children.length;
+
+    currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+    updateCarousel();
+}
+
+function nextImage() {
+    const carouselInner = document.getElementById('carouselInner');
+    const totalImages = carouselInner.children.length;
+
+    currentImageIndex = (currentImageIndex + 1) % totalImages;
+    updateCarousel();
+}
         // Validate quantity against available stock
         function validateQuantity() {
             let quantityInput = document.getElementById('quantityInput');
@@ -590,7 +799,7 @@ $category_result = $conn->query($category_query);
             
             // Check if user is logged in
             <?php if ($username === "Guest") : ?>
-                window.location.href = "login.php";
+                window.location.href = "homepage.php?action=login";
                 return;
             <?php endif; ?>
             
@@ -628,7 +837,7 @@ $category_result = $conn->query($category_query);
         // Buy now functionality
         function buyNow() {
             <?php if ($username === "Guest") : ?>
-                window.location.href = "login.php";
+                window.location.href = "homepage.php?action=login";
                 return;
             <?php endif; ?>
             
@@ -679,6 +888,91 @@ $category_result = $conn->query($category_query);
             // Initialize cart count
             updateCartCount();
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+    // Check if the user is logged in
+    const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+
+    if (isLoggedIn) {
+        // Add event listener for the popstate event (back button)
+        window.addEventListener('popstate', function(event) {
+            // Automatically redirect to logout page when back button is pressed
+            window.location.href = "logout.php";
+            
+            // Prevent default navigation
+            event.preventDefault();
+        });
+        
+        // Push state once to enable back button detection
+        history.pushState(null, document.title, location.href);
+    }
+});
+
+// Function to open the zoomed image
+function openZoom(imageSrc) {
+    const zoomedImage = document.getElementById('zoomedImage');
+    zoomedImage.src = imageSrc;
+    document.getElementById('zoomedImageOverlay').style.display = 'block';
+}
+
+// Function to close the zoomed image
+function closeZoom() {
+    document.getElementById('zoomedImageOverlay').style.display = 'none';
+}
+
+// Update the openModal function to make images clickable
+function openModal(productId, name, category, price, imagesJson, stock) {
+    // Store current product information
+    currentProductId = productId;
+    currentProductName = name;
+    currentProductPrice = parseFloat(price);
+
+    // Set modal content
+    document.getElementById('modalTitle').innerText = name;
+    document.getElementById('modalCategory').innerText = "Category: " + category;
+    document.getElementById('modalPrice').innerText = "Price: $" + price;
+    document.getElementById('modalStock').innerText = "Stock: " + stock + " items available";
+
+    // Parse and set product images
+    let images;
+    try {
+        images = JSON.parse(imagesJson);
+    } catch (error) {
+        console.error("Invalid JSON format for images:", error);
+        images = [];
+    }
+
+    // If no images, use a default image
+    if (!Array.isArray(images) || images.length === 0) {
+        images = ['images/default-product.jpg'];
+    }
+
+    // Clear existing carousel images
+    const carouselInner = document.getElementById('carouselInner');
+    carouselInner.innerHTML = '';
+
+    // Add images to the carousel
+    images.forEach((image, index) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image;
+        imgElement.alt = `${name} - Image ${index + 1}`;
+        imgElement.style.width = "400px"; // Ensure image width is 800px
+        imgElement.style.height = "400px"; // Ensure image height is 800px
+        imgElement.onclick = () => openZoom(image); // Make image clickable
+        carouselInner.appendChild(imgElement);
+    });
+    // Reset carousel position
+    currentImageIndex = 0;
+    updateCarousel();
+
+    // Set stock information
+    document.getElementById('quantityInput').setAttribute("max", stock);
+    document.getElementById('quantityInput').value = 1;
+    document.getElementById('stockMessage').style.display = "none";
+
+    // Show modal
+    document.getElementById('productModal').classList.add('show');
+}
     </script>
 </body>
 </html>

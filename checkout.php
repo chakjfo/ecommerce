@@ -501,9 +501,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                         <div class="form-group full-width">
                             <label for="payment_method">Payment Method</label>
                             <select id="payment_method" name="payment_method" required>
-                                <option value="">Select Payment Method</option>
-                                <option value="credit_card">Credit Card</option>
-                                <option value="paypal">PayPal</option>
                                 <option value="cash_on_delivery">Cash on Delivery</option>
                             </select>
                         </div>

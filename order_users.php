@@ -316,6 +316,11 @@ while ($row = $result->fetch_assoc()) {
             color: #856404;
         }
         
+        .status-shipped {
+            background-color:rgb(235, 141, 86);
+            color:rgb(0, 0, 0);
+        }
+        
         .status-delivered {
             background-color: #d4edda;
             color: #155724;
@@ -347,7 +352,6 @@ while ($row = $result->fetch_assoc()) {
         
         .item-name {
             font-size: 16px;
-            font-weight: bold;
         }
         
         .item-meta {
@@ -358,7 +362,6 @@ while ($row = $result->fetch_assoc()) {
         
         .item-price {
             font-size: 16px;
-            font-weight: bold;
         }
         
         .order-footer {
@@ -372,7 +375,6 @@ while ($row = $result->fetch_assoc()) {
         
         .order-total {
             font-size: 18px;
-            font-weight: bold;
         }
         
         .shipping-info {
@@ -394,6 +396,31 @@ while ($row = $result->fetch_assoc()) {
             color: #666;
         }
         
+        /* Cancel Order Button Styles */
+.cancel-order-btn {
+    background-color:rgb(220, 66, 82); /* Red color for cancel action */
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-order-btn:hover {
+    background-color:rgb(255, 0, 25); /* Darker red on hover */
+}
+
+.cancel-order-btn:active {
+    background-color: #bd2130; /* Even darker red when clicked */
+}
+
+.cancel-order-btn:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.5); /* Add a focus ring */
+}
+
         /* Responsive Design */
         @media (max-width: 768px) {
             nav {
@@ -540,62 +567,64 @@ while ($row = $result->fetch_assoc()) {
     </header>
 
     <div class="container">
-        <h1 class="page-title">My Orders</h1>
-        
-        <?php if (!empty($orders)) : ?>
-            <div class="orders-container">
-                <?php foreach ($orders as $order) : ?>
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div class="order-number">Order #<?= $order['order_id'] ?></div>
-                            <div class="order-date">
-                                <?= date('F j, Y', strtotime($order['order_date'])) ?>
-                            </div>
-                            <div class="order-status status-<?= strtolower($order['delivery_status']) ?>">
-                                <?= htmlspecialchars($order['delivery_status']) ?>
-                            </div>
+    <h1 class="page-title">My Orders</h1>
+    
+    <?php if (!empty($orders)) : ?>
+        <div class="orders-container">
+            <?php foreach ($orders as $order) : ?>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-number">Order #<?= $order['order_id'] ?></div>
+                        <div class="order-date">
+                            <?= date('F j, Y', strtotime($order['order_date'])) ?>
                         </div>
-                        
-                        <div class="order-items">
-                            <?php if (!empty($order['items'])) : ?>
-                                <?php foreach ($order['items'] as $item) : ?>
-                                    <div class="order-item">
-                                        <div class="item-details">
-                                            <div class="item-name"><?= htmlspecialchars($item['ProductName']) ?></div>
-                                            <div class="item-meta">
-                                                Size: <?= htmlspecialchars($item['Size']) ?> | 
-                                                Qty: <?= (int)$item['Quantity'] ?>
-                                            </div>
-                                        </div>
-                                        <div class="item-price">$<?= number_format($item['Price'], 2) ?></div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <p>No item details available</p>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="order-footer">
-                            <div class="order-total">Total: $<?= number_format($order['TotalAmount'], 2) ?></div>
-                            <div class="shipping-info">
-                                Shipping: <?= htmlspecialchars($order['address']) ?>
-                            </div>
-                            <div class="payment-method">
-                                Payment: <?= htmlspecialchars($order['payment_method']) ?>
-                            </div>
+                        <div class="order-status status-<?= strtolower($order['delivery_status']) ?>">
+                            <?= htmlspecialchars($order['delivery_status']) ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <div class="no-orders">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px;"></i>
-                <p>You don't have any orders yet.</p>
-                <a href="shop_customer.php" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: black; color: white; text-decoration: none; border-radius: 4px;">Start Shopping</a>
-            </div>
-        <?php endif; ?>
-    </div>
-
+                    
+                    <div class="order-items">
+                        <?php if (!empty($order['items'])) : ?>
+                            <?php foreach ($order['items'] as $item) : ?>
+                                <div class="order-item">
+                                    <div class="item-details">
+                                        <div class="item-name"><?= htmlspecialchars($item['ProductName']) ?></div>
+                                        <div class="item-meta">
+                                            Size: <?= htmlspecialchars($item['Size']) ?> | 
+                                            Qty: <?= (int)$item['Quantity'] ?>
+                                        </div>
+                                    </div>
+                                    <div class="item-price">$<?= number_format($item['Price'], 2) ?></div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>No item details available</p>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="order-total">Total: $<?= number_format($order['TotalAmount'], 2) ?></div>
+                        <div class="shipping-info">
+                            Shipping: <?= htmlspecialchars($order['address']) ?>
+                        </div>
+                        <div class="payment-method">
+                            Payment: <?= htmlspecialchars($order['payment_method']) ?>
+                        </div>
+                        <?php if ($order['delivery_status'] !== 'Cancelled' && $order['delivery_status'] !== 'Delivered') : ?>
+                            <button class="cancel-order-btn" data-order-id="<?= $order['order_id'] ?>">Cancel Order</button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="no-orders">
+            <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px;"></i>
+            <p>You don't have any orders yet.</p>
+            <a href="shop_customer.php" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: black; color: white; text-decoration: none; border-radius: 4px;">Start Shopping</a>
+        </div>
+    <?php endif; ?>
+</div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const profileToggle = document.getElementById('profileToggle');
@@ -616,6 +645,57 @@ while ($row = $result->fetch_assoc()) {
                 });
             }
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+        const cancelOrderButtons = document.querySelectorAll('.cancel-order-btn');
+        
+        cancelOrderButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order-id');
+                
+                // Show confirmation prompt
+                if (confirm('Are you sure you want to cancel this order?')) {
+                    // Send AJAX request to cancel the order
+                    fetch('cancel_order.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Update the UI to reflect the cancelled status
+                            const orderCard = this.closest('.order-card');
+                            const statusElement = orderCard.querySelector('.order-status');
+                            
+                            // Update status text and styling
+                            statusElement.textContent = 'Cancelled';
+                            statusElement.classList.remove('status-pending', 'status-shipped');
+                            statusElement.classList.add('status-cancelled');
+                            
+                            // Remove the Cancel Order button
+                            this.remove();
+                        } else {
+                            alert(data.message || 'Failed to cancel the order');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cancelling order:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>

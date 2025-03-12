@@ -2,7 +2,6 @@
 session_start();
 require 'db_connection.php';
 
-// User authentication handling
 $username = isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : "Guest";
 
 if (!isset($_SESSION['order_id'])) {
@@ -14,27 +13,30 @@ $order_id = $_SESSION['order_id'];
 unset($_SESSION['order_id']);
 
 // Fetch order details
-$order_query = "SELECT *, DATE_FORMAT(delivery_date, '%M %e, %Y') AS eta 
-               FROM orders WHERE OrderID = ?";
+$order_query = "SELECT *, DATE_FORMAT(delivery_date, '%M %e, %Y') AS eta FROM orders WHERE OrderID = ?";
 $stmt = $conn->prepare($order_query);
 $stmt->bind_param("i", $order_id);
 $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
 
-// Fetch order items
-$items_query = "SELECT oi.*, p.ProductName 
-               FROM order_items oi
-               JOIN products p ON oi.product_id = p.ProductID
-               WHERE order_id = ?";
+// Fetch customer details
+$customer_query = "SELECT customer_name, email, phone, address FROM customer_orders WHERE order_id = ?";
+$stmt = $conn->prepare($customer_query);
+$stmt->bind_param("i", $order_id);
+$stmt->execute();
+$customer = $stmt->get_result()->fetch_assoc();
+
+// Fetch order items with price from the products table
+$items_query = "SELECT co.product_id, co.quantity, p.ProductName, p.Price 
+               FROM customer_orders co
+               JOIN products p ON co.product_id = p.ProductID
+               WHERE co.order_id = ?";
 $stmt = $conn->prepare($items_query);
 $stmt->bind_param("i", $order_id);
 $stmt->execute();
 $items = $stmt->get_result();
-
-// Fetch categories for navigation (added from shop_customer)
-$category_query = "SELECT category_name FROM categories";
-$category_result = $conn->query($category_query);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -239,6 +241,76 @@ $category_result = $conn->query($category_query);
         }
         
         .eta { color: #27ae60; font-weight: bold; }
+
+        .order-confirmation {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .waybill-header {
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+        }
+        
+        .order-items-list {
+            list-style: none;
+            padding: 0;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .details-section {
+            margin-bottom: 25px;
+        }
+        .totals-section {
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            text-align: right;
+        }
+        .order-id {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .payment-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .status-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .estimated-delivery {
+            color: #28a745;
+            font-weight: bold;
+        }
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .order-confirmation {
+                box-shadow: none;
+                padding: 0;
+            }
+            .print-button {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -294,27 +366,84 @@ $category_result = $conn->query($category_query);
 
     <div class="container">
         <div class="waybill">
-            <h2>Order Confirmation #<?= $order_id ?></h2>
-            <p>Estimated Delivery: <span class="eta"><?= $order['eta'] ?></span></p>
-            
-            <h3>Shipping Address:</h3>
-            <p><?= htmlspecialchars($order['shipping_address']) ?></p>
-            
-            <h3>Order Items:</h3>
-            <ul>
-                <?php while($item = $items->fetch_assoc()) : ?>
-                <li>
-                    <?= htmlspecialchars($item['ProductName']) ?> - 
-                    Qty: <?= $item['quantity'] ?> - 
-                    $<?= number_format($item['price'], 2) ?>
-                </li>
-                <?php endwhile; ?>
-            </ul>
-            
-            <h3>Total Paid: $<?= number_format($order['TotalAmount'], 2) ?></h3>
-            <p>Payment Method: <?= $order['payment_method'] ?></p>
-        </div>
-        <a href="shop_customer.php">Continue Shopping</a>
+
+            <div class="order-confirmation">
+    <div class="waybill-header d-flex justify-content-between align-items-center">
+        <h1 class="order-id">Order Confirmation #<?php echo $order_id; ?></h1>
+        <button class="btn btn-primary print-button" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+        </button>
     </div>
+    
+    <div class="row details-section">
+        <div class="col-md-6">
+            <h5>Order Information</h5>
+            <p><strong>Order Date:</strong> <?php echo $order['OrderDate']; ?></p>
+            <p><strong>Estimated Delivery:</strong> <span class="estimated-delivery"><?php echo $order['eta']; ?></span></p>
+            <p><strong>Status:</strong> <span class="status-badge"><?php echo $order['delivery_status']; ?></span></p>
+        </div>
+        <div class="col-md-6">
+            <h5>Shipping Address</h5>
+            <p><?php echo $customer['address']; ?></p>
+        </div>
+    </div>
+    
+    <div class="details-section">
+    <h5>Order Items</h5>
+    <?php
+    // Store items in an array for reuse
+    $order_items = [];
+    $subtotal = 0;
+
+    if ($items->num_rows > 0) {
+        while ($item = $items->fetch_assoc()) {
+            $order_items[] = $item;
+            $subtotal += $item['Price'] * $item['quantity'];
+        }
+    }
+    ?>
+
+    <?php if (!empty($order_items)): ?>
+        <ul class="order-items-list">
+            <?php foreach ($order_items as $item): ?>
+                <li class="order-item">
+                    <div><?php echo $item['ProductName']; ?> (ID: <?php echo $item['product_id']; ?>)</div>
+                    <div>Qty: <?php echo $item['quantity']; ?> × $<?php echo $item['Price']; ?> = $<?php echo $item['quantity'] * $item['Price']; ?></div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php else: ?>
+        <p class="text-muted">No items found for this order.</p>
+    <?php endif; ?>
+</div>
+
+<div class="totals-section">
+    <div class="row">
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <?php
+            // Calculate tax and total
+            $tax = $subtotal * 0.08;
+            $total_paid = $subtotal + $tax;
+            ?>
+            <p><strong>Subtotal:</strong> $<?php echo number_format($subtotal, 2); ?></p>
+            <p><strong>Tax (8%):</strong> $<?php echo number_format($tax, 2); ?></p>
+            <p><strong>Shipping:</strong> $0.00</p>
+            <h4><strong>Total Paid:</strong> $<?php echo number_format($total_paid, 2); ?></h4>
+        </div>
+    </div>
+</div>
+    
+    <div class="payment-info">
+        <h5>Payment Information</h5>
+        <p><strong>Payment Method:</strong> <?php echo $order['payment_method']; ?></p>
+    </div>
+    
+    <div class="mt-4 text-center">
+        <p>Thank you for your order!</p>
+        <p class="text-muted">If you have any questions about your order, please contact our customer service.</p>
+    </div>
+</div>
+        </div> 
 </body>
 </html>

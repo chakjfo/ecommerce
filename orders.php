@@ -1,4 +1,4 @@
-    <?php
+<?php
     // Ensure this is an admin-only page
     session_start();
     if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
@@ -350,6 +350,8 @@
                                                 <li><a class="dropdown-item" href="#" data-status="pending" data-id="<?php echo $order['OrderID']; ?>">Pending</a></li>
                                                 <li><a class="dropdown-item" href="#" data-status="shipped" data-id="<?php echo $order['OrderID']; ?>">Shipped</a></li>
                                                 <li><a class="dropdown-item" href="#" data-status="delivered" data-id="<?php echo $order['OrderID']; ?>">Delivered</a></li>
+                                                <li><a class="dropdown-item" href="#" data-status="cancelled" data-id="<?php echo $order['OrderID']; ?>">Cancelled</a></li>
+                                                
                                             </ul>
                                         </div>
                                         <button class="btn btn-danger btn-sm delete-order" 
@@ -406,10 +408,10 @@
                                     <h6>Order Items:</h6>
                                     <ul class="order-items-list" id="orderItems"></ul>
                                     <div class="text-end">
-                                        <h5>Subtotal: $<span id="subtotal"></span></h5>
-                                        <h5>Tax (8%): $<span id="tax"></span></h5>
-                                        <h5>Shipping: $<span id="shipping"></span></h5>
-                                        <h5>Total: $<span id="orderTotal"></span></h5>
+                                        <h5>Subtotal: <span id="subtotal"></span></h5>
+                                        <h5>Tax (8%): <span id="tax"></span></h5>
+                                        <h5>Shipping: <span id="shipping"></span></h5>
+                                        <h5>Total: <span id="orderTotal"></span></h5>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -460,12 +462,18 @@
                                         url: 'delete_order.php',
                                         method: 'POST',
                                         data: { order_id: orderId },
+                                        dataType: 'json',
                                         success: function(response) {
-                                            window.location.href = 'orders.php?success=' + encodeURIComponent('Order deleted successfully!');
+                                            if (response.success) {
+                                                alert('Order deleted successfully!');
+                                                location.reload();  // Refresh the page to see the updated list of orders
+                                            } else {
+                                                alert('Failed to delete order: ' + response.message);
+                                            }
                                         },
                                         error: function(xhr, status, error) {
                                             console.error('AJAX Error:', error);
-                                            window.location.href = 'orders.php?error=' + encodeURIComponent('Failed to delete order. Please try again.');
+                                            alert('Failed to delete order. Please try again.');
                                         }
                                     });
                                 }

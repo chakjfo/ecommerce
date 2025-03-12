@@ -6,6 +6,8 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 require_once "db_connection.php";
+
+
 ?>
 
 <!DOCTYPE html>
@@ -239,6 +241,7 @@ require_once "db_connection.php";
         }
     </style>
 </head>
+
 <body>
     <div class="wrapper">
         <!-- Sidebar -->
@@ -391,25 +394,25 @@ require_once "db_connection.php";
                     </div>
                 </div>
                 
-                <!-- Delete Confirmation Modal -->
-                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Are you sure you want to delete this user?</p>
-                                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user?</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -500,31 +503,36 @@ require_once "db_connection.php";
                 });
             });
             
-            // Delete button click handler
-            $('#deleteUserBtn').on('click', function() {
-                if (selectedUserId) {
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    $('#confirmDeleteBtn').off('click').on('click', function() {
-                        $.ajax({
-                            url: 'delete_user.php',
-                            method: 'POST',
-                            data: { userId: selectedUserId },
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    window.location.reload();
-                                } else {
-                                    alert('Error: ' + (response.message || 'Failed to delete user'));
-                                }
-                            },
-                            error: function() {
-                                alert('Error connecting to server');
-                            }
-                        });
-                    });
-                    deleteModal.show();
+// Delete button click handler
+$('#deleteUserBtn').on('click', function() {
+    if (selectedUserId) {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        
+        // Set up the confirm delete button click handler
+        $('#confirmDeleteBtn').off('click').on('click', function() {
+            $.ajax({
+                url: 'delete_user.php',
+                method: 'POST',
+                data: { userId: selectedUserId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Reload the page to reflect the changes
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to delete user'));
+                    }
+                },
+                error: function() {
+                    alert('Error connecting to server');
                 }
             });
+        });
+        
+        // Show the delete confirmation modal
+        deleteModal.show();
+    }
+});
         });
     </script>
 </body>

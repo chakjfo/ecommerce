@@ -1,39 +1,35 @@
 <?php
+// delete_user.php
+
+session_start();
+if (!isset($_SESSION['username']) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+    exit();
+}
+
 require_once "db_connection.php";
 
-// Check if request is valid
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["userId"])) {
-    $userId = intval($_POST["userId"]);
-    
-    try {
-        // Prevent deleting current admin
-        if ($userId === $_SESSION['user_id']) {
-            throw new Exception("Cannot delete currently logged-in admin");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userId = $_POST['userId'] ?? null;
+
+    if ($userId) {
+        // Prepare the SQL statement to delete the user
+        $stmt = $conn->prepare("DELETE FROM users WHERE UserID = ?");
+        $stmt->bind_param("i", $userId);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to delete user']);
         }
 
-        $sql = "DELETE FROM users WHERE UserID = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        
-        if ($stmt->execute()) {
-            echo json_encode(["success" => true]);
-        } else {
-            throw new Exception("Database error: " . $stmt->error);
-        }
-    } catch (Exception $e) {
-        echo json_encode([
-            "success" => false,
-            "message" => $e->getMessage()
-        ]);
-    } finally {
-        if (isset($stmt)) $stmt->close();
-        $conn->close();
+        $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'User ID is required']);
     }
 } else {
-    http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "message" => "Invalid request method or parameters"
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
+
+$conn->close();
 ?>

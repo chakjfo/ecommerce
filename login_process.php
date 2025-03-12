@@ -14,11 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_result($userID, $username_db, $hashed_password, $role);
         $stmt->fetch();
     
-        echo "User found: " . $username_db . "<br>";  // Debugging step
-        echo "Hashed Password from DB: " . $hashed_password . "<br>";
-    
         if (password_verify($password, $hashed_password)) {
-            echo "Password Matched! Redirecting...<br>";
             $_SESSION['user_id'] = $userID;
             $_SESSION['username'] = $username_db;
             $_SESSION['role'] = $role;
@@ -26,12 +22,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: " . ($role === 'admin' ? 'admin.php' : 'shop_customer.php'));
             exit();
         } else {
-            echo "Invalid Password!";
+            $_SESSION['login_error'] = "Invalid username or password.";
+            header("Location: homepage.php?action=login");
+            exit();
         }
     } else {
-        echo "User not found!";
+        $_SESSION['login_error'] = "Invalid username or password.";
+        header("Location: homepage.php?action=login");
+        exit();
     }
 } else {
-    echo "Invalid request.";
-}   
+    $_SESSION['login_error'] = "Invalid request.";
+    header("Location: homepage.php?action=login");
+    exit();
+}
 ?>

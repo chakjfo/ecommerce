@@ -1,3 +1,6 @@
+<?php
+session_start(); // Start the session
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,6 +239,27 @@
         .auth-link:hover {
             text-decoration: underline;
         }
+
+        .error-message-container {
+            background-color: transparent;
+            color: red;
+            margin-bottom: -2px;
+            margin-top: -2px;
+            border-radius: 5px;
+            display: none; /* Initially hidden */
+        }
+
+@keyframes slideDown {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -379,89 +403,155 @@
         </div>
     </footer>
 
-    <!-- Login Modal -->
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
-                    <h2 class="mb-4">Sign in to your account</h2>
-                    <form action="login_process.php" method="POST">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Username" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Password" required>
-                        </div>
-                        <button type="submit" class="auth-btn mb-3">Sign in</button>
-                    </form>
-                    <p>Not a member? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up here.</a></p>
-                </div>
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
+            <div class="modal-body text-center">
+                <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
+                <h2 class="mb-4">Sign in to your account</h2>
 
-    <!-- Signup Modal -->
-    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <!-- Error Message Container for Login -->
+                <div id="login-error-container" class="error-message-container mb-3" style="display: none; background-color: transparent; color: red; margin-bottom: -2px; margin-top: -2px; border-radius: 5px;">
+                    <!-- Error messages will be inserted here via PHP -->
                 </div>
-                <div class="modal-body text-center">
-                    <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
-                    <h2 class="mb-4">Create an Account</h2>
-                    <form action="signup_process.php" method="POST">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Username" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Password" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" name="phone" class="form-control" placeholder="Phone Number" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" name="email" class="form-control" placeholder="Email" required>
-                        </div>
-                        <div class="mb-3">
-                            <select name="role" class="form-control" required>
-                                <option value="customer">Customer</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="auth-btn mb-3">Sign up</button>
-                    </form>
-                    <p>Already have an account? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login here.</a></p>
-                </div>
+
+                <form action="login_process.php" method="POST">
+                    <div class="mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="auth-btn mb-3">Sign in</button>
+                </form>
+                <p>Not a member? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">Sign up here.</a></p>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Signup Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="images/the_accents_logo.png" alt="The Accents Clothing" class="modal-logo">
+                <h2 class="mb-4">Create an Account</h2>
+                
+                <!-- Dedicated Error Message Container with proper spacing -->
+                <div id="signup-error-container" class="error-message-container mb-3" style="display: none; background-color: transparent; color: red; margin-bottom: -2px; margin-top: -2px; border-radius: 5px;">
+                <!-- Error messages will be inserted here via PHP -->
+                </div>
+                
+                <form action="signup_process.php" method="POST">
+                    <div class="mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="phone" class="form-control" placeholder="Phone Number" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <select name="role" class="form-control" required>
+                            <option value="customer">Customer</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="auth-btn mb-3">Sign up</button>
+                </form>
+                <p>Already have an account? <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login here.</a></p>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // Check URL parameters to see if we need to open a modal
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const action = urlParams.get('action');
-        
-        // Open the appropriate modal based on the action parameter
-        if (action === 'login') {
-            var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
-        } else if (action === 'signup') {
-            var signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
-            signupModal.show();
-        }
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+
+    // Open the appropriate modal based on the action parameter
+    if (action === 'login') {
+        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    } else if (action === 'signup') {
+        var signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+        signupModal.show();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+
+    if (action === 'signup') {
+        var signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+        signupModal.show();
+
+        <?php if(isset($_SESSION['signup_errors']) && !empty($_SESSION['signup_errors'])): ?>
+            var errorContainer = document.getElementById('signup-error-container');
+            errorContainer.innerHTML = "<?php 
+                if(isset($_SESSION['signup_errors'])) {
+                    foreach($_SESSION['signup_errors'] as $error) {
+                        echo addslashes($error) . "<br>";
+                    }
+                    // Clear errors after displaying
+                    unset($_SESSION['signup_errors']);
+                }
+            ?>";
+            errorContainer.style.display = 'block'; // Ensure the container is visible
+        <?php endif; ?>
+
+        <?php if(isset($_SESSION['signup_data'])): ?>
+            document.querySelector('#signupModal input[name="username"]').value = "<?php echo isset($_SESSION['signup_data']['username']) ? addslashes($_SESSION['signup_data']['username']) : ''; ?>";
+            document.querySelector('#signupModal input[name="email"]').value = "<?php echo isset($_SESSION['signup_data']['email']) ? addslashes($_SESSION['signup_data']['email']) : ''; ?>";
+            document.querySelector('#signupModal input[name="phone"]').value = "<?php echo isset($_SESSION['signup_data']['phone']) ? addslashes($_SESSION['signup_data']['phone']) : ''; ?>";
+            document.querySelector('#signupModal select[name="role"]').value = "<?php echo isset($_SESSION['signup_data']['role']) ? addslashes($_SESSION['signup_data']['role']) : 'customer'; ?>";
+            <?php unset($_SESSION['signup_data']); ?>
+        <?php endif; ?>
+    }
+
+    <?php if(isset($_SESSION['signup_success'])): ?>
+        alert("<?php echo $_SESSION['signup_success']; ?>");
+        <?php unset($_SESSION['signup_success']); ?>
+    <?php endif; ?>
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+
+    // Open the login modal if the action is 'login'
+    if (action === 'login') {
+        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+
+        // Display login error if it exists
+        <?php if(isset($_SESSION['login_error'])): ?>
+            var errorContainer = document.getElementById('login-error-container');
+            errorContainer.innerHTML = "<?php echo addslashes($_SESSION['login_error']); ?>";
+            errorContainer.style.display = 'block'; // Show the error container
+            <?php unset($_SESSION['login_error']); ?> // Clear the error from the session
+        <?php endif; ?>
+    }
+});
 </script>
 </body>
 </html>
