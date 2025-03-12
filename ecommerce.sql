@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 10, 2025 at 03:54 AM
+-- Generation Time: Mar 12, 2025 at 06:35 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,7 +42,8 @@ CREATE TABLE `cart` (
 
 INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `size`, `added_at`) VALUES
 (1, 13, 14, 2, 'S', '2025-03-07 02:01:03'),
-(2, 13, 18, 1, 'S', '2025-03-07 02:01:55');
+(2, 13, 18, 1, 'S', '2025-03-07 02:01:55'),
+(46, 13, 23, 1, 'S', '2025-03-12 07:46:14');
 
 -- --------------------------------------------------------
 
@@ -62,7 +63,7 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `category_name`, `date_added`, `date_edited`) VALUES
-(7, 'Tee', '2025-03-06 19:06:52', '2025-03-06 19:06:52'),
+(7, 'Tee', '2025-03-06 19:06:52', '2025-03-12 05:30:40'),
 (8, 'Sweats', '2025-03-06 19:07:04', '2025-03-06 19:07:04'),
 (9, 'Pants', '2025-03-06 19:07:10', '2025-03-06 19:07:10'),
 (10, 'Accessories', '2025-03-06 19:07:26', '2025-03-06 19:07:26'),
@@ -86,25 +87,6 @@ CREATE TABLE `customer_orders` (
   `order_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `customer_orders`
---
-
-INSERT INTO `customer_orders` (`order_id`, `customer_name`, `product_id`, `email`, `phone`, `address`, `payment_method`, `quantity`, `order_date`) VALUES
-(3, 'Charish Blase Pulido', 20, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:36:46'),
-(3, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:36:46'),
-(3, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:36:46'),
-(4, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 1, '2025-03-06 20:41:25'),
-(5, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 1, '2025-03-06 20:42:18'),
-(6, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-06 20:45:30'),
-(7, 'Cha Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 3, '2025-03-09 22:44:33'),
-(8, 'Cha Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 5, '2025-03-09 22:46:28'),
-(9, 'Cha Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Saavedra St. Toril Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 3, '2025-03-09 22:48:09'),
-(10, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 5, '2025-03-09 23:04:28'),
-(11, 'Charish Blase Pulido', 20, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'PayPal', 5, '2025-03-09 23:55:42'),
-(12, 'Charish Blase Pulido', 21, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 2, '2025-03-10 01:39:18'),
-(13, 'Charish Blase Pulido', 22, 'cha.pulido04@gmail.com', '09381946512', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', '', 1, '2025-03-10 01:49:22');
-
 -- --------------------------------------------------------
 
 --
@@ -117,19 +99,10 @@ CREATE TABLE `orders` (
   `OrderDate` timestamp NOT NULL DEFAULT current_timestamp(),
   `TotalAmount` decimal(10,2) NOT NULL,
   `delivery_date` date DEFAULT NULL,
-  `delivery_status` enum('Pending','Shipped','Delivered') DEFAULT 'Pending',
+  `delivery_status` enum('Pending','Shipped','Delivered','Cancelled') DEFAULT 'Pending',
   `shipping_address` varchar(255) NOT NULL,
   `payment_method` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`OrderID`, `UserID`, `OrderDate`, `TotalAmount`, `delivery_date`, `delivery_status`, `shipping_address`, `payment_method`) VALUES
-(11, 13, '2025-03-09 23:55:42', 97.20, '2025-03-20', 'Pending', 'Purok 4 Slaughter, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'paypal'),
-(12, 13, '2025-03-10 01:39:18', 58.32, '2025-03-20', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'credit_card'),
-(13, 13, '2025-03-10 01:49:22', 29.16, '2025-03-20', 'Pending', 'Purok 4, Saavedra Street, Toril, Davao City, CITY OF DAVAO, Davao del Sur 8000', 'cash_on_delivery');
 
 -- --------------------------------------------------------
 
@@ -171,9 +144,21 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`ProductID`, `ProductName`, `Description`, `Price`, `sizes`, `StockQuantity`, `images`, `created_at`, `categories`, `edited_at`, `updated_at`) VALUES
-(20, 'JESUS SAVES', 'Tax not included. Free Shipping.', 18.00, '', 0, '[\"uploads\\/products\\/product_67c9f2f1a08c9_1741288177.png\"]', '2025-03-06 19:09:37', '7', '2025-03-09 23:55:42', '2025-03-09 23:55:42'),
-(21, 'OG Logo', 'Tax not included. Free shipping.', 27.00, '', 2, '[\"uploads\\/products\\/product_67c9f3e166dec_1741288417.png\",\"uploads\\/products\\/product_67c9f3e167223_1741288417.png\"]', '2025-03-06 19:13:37', '9', '2025-03-10 01:39:18', '2025-03-10 01:39:18'),
-(22, 'Scribble Logo Sweat Pants', 'Tax not included. Free shipping.', 27.00, '', 20, '[\"uploads\\/products\\/product_67c9f43f82ef4_1741288511.png\",\"uploads\\/products\\/product_67c9f43f83263_1741288511.png\"]', '2025-03-06 19:15:11', '8', '2025-03-10 01:49:22', '2025-03-10 01:49:22');
+(24, 'Waterlilies', 'Tax not included. Free shipping.', 40.00, '', 15, '[\"uploads\\/products\\/product_67d0d3eba3fef_1741738987.jpg\",\"uploads\\/products\\/product_67d0d3eba4be6_1741738987.jpg\"]', '2025-03-12 00:23:07', '11', '2025-03-12 04:20:29', '2025-03-12 04:20:29'),
+(25, 'DESIDERATA Hoodie', 'Tax not included. Free shipping.', 30.00, '', 10, '[\"uploads\\/products\\/product_67d0db0dc493c_1741740813.jpg\",\"uploads\\/products\\/product_67d0db0dc55ab_1741740813.jpg\",\"uploads\\/products\\/product_67d0db0dc5b88_1741740813.jpg\"]', '2025-03-12 00:53:33', '8', '2025-03-12 00:53:33', '2025-03-12 00:53:33'),
+(26, 'DAMN Crewneck', 'Tax not included. Free shipping.', 22.00, '', 10, '[\"uploads\\/products\\/product_67d0db8f54cdc_1741740943.jpg\",\"uploads\\/products\\/product_67d0db8f551a4_1741740943.jpg\"]', '2025-03-12 00:55:43', '8', '2025-03-12 00:55:43', '2025-03-12 00:55:43'),
+(27, 'HORSE Hoodie', 'Tax not included. Free shipping.', 30.00, '', 19, '[\"uploads\\/products\\/product_67d0e4b8ddae0_1741743288.jpg\",\"uploads\\/products\\/product_67d0e4b8ded0a_1741743288.jpg\",\"uploads\\/products\\/product_67d0e4b8df1ea_1741743288.jpg\"]', '2025-03-12 01:34:48', '8', '2025-03-12 02:17:09', '2025-03-12 02:17:09'),
+(28, 'QUID PRO QUO Hoodie', 'Tax not included. Free shipping.', 30.00, '', 9, '[\"uploads\\/products\\/product_67d0e4e7640ad_1741743335.jpg\",\"uploads\\/products\\/product_67d0e4e7644d7_1741743335.jpg\",\"uploads\\/products\\/product_67d0e4e764c21_1741743335.jpg\"]', '2025-03-12 01:35:35', '8', '2025-03-12 01:35:35', '2025-03-12 01:35:35'),
+(29, 'LETTERMARK Hoodie', 'Tax not included. Free shipping.', 30.00, '', 10, '[\"uploads\\/products\\/product_67d0e52e4a6b5_1741743406.jpg\",\"uploads\\/products\\/product_67d0e52e4acd9_1741743406.jpg\"]', '2025-03-12 01:36:46', '8', '2025-03-12 01:36:46', '2025-03-12 01:36:46'),
+(30, 'DUMPLING Bag', 'Tax not included. Free Shipping.', 10.00, '', 20, '[\"uploads\\/products\\/product_67d0fef36a9dc_1741750003.png\"]', '2025-03-12 03:26:43', '10', '2025-03-12 03:26:43', '2025-03-12 03:26:43'),
+(31, 'TAGS LOGO Tote Bag', 'Tax not included. Free Shipping.', 10.00, '', 6, '[\"uploads\\/products\\/product_67d0ff194e83a_1741750041.png\"]', '2025-03-12 03:27:21', '10', '2025-03-12 03:27:57', '2025-03-12 03:27:57'),
+(32, 'BRUSH Tee', 'Tax not included. Free shipping.', 15.00, '', 8, '[\"uploads\\/products\\/product_67d101e83c2a9_1741750760.jpg\",\"uploads\\/products\\/product_67d101e83ceac_1741750760.jpg\",\"uploads\\/products\\/product_67d101e83d3da_1741750760.jpg\"]', '2025-03-12 03:39:20', '7', '2025-03-12 03:39:20', '2025-03-12 03:39:20'),
+(33, 'EARTH Tee', 'Tax not included. Free shipping.', 15.00, '', 5, '[\"uploads\\/products\\/product_67d10202cfed2_1741750786.jpg\",\"uploads\\/products\\/product_67d10202d04ad_1741750786.jpg\"]', '2025-03-12 03:39:46', '7', '2025-03-12 03:39:46', '2025-03-12 03:39:46'),
+(34, 'JUDAS Tee', 'Tax not included. Free shipping.', 15.00, '', 10, '[\"uploads\\/products\\/product_67d10217b43c6_1741750807.jpg\",\"uploads\\/products\\/product_67d10217b4c8f_1741750807.jpg\"]', '2025-03-12 03:40:07', '7', '2025-03-12 03:40:07', '2025-03-12 03:40:07'),
+(35, 'MERCURIAL Tee', 'Tax not included. Free shipping.', 15.00, '', 10, '[\"uploads\\/products\\/product_67d1023b0def3_1741750843.jpg\",\"uploads\\/products\\/product_67d1023b0e338_1741750843.jpg\",\"uploads\\/products\\/product_67d1023b0e855_1741750843.jpg\"]', '2025-03-12 03:40:43', '7', '2025-03-12 03:40:43', '2025-03-12 03:40:43'),
+(36, 'FALSE PROPHET Tee', 'Tax not included. Free shipping.', 15.00, '', 9, '[\"uploads\\/products\\/product_67d1025f125cd_1741750879.jpg\",\"uploads\\/products\\/product_67d1025f12a0a_1741750879.jpg\"]', '2025-03-12 03:41:19', '7', '2025-03-12 04:14:34', '2025-03-12 04:14:34'),
+(37, 'SCRIBBLE Sweat Pants', 'Tax not included. Free shipping.', 27.00, '', 10, '[\"uploads\\/products\\/product_67d106353875b_1741751861.jpg\",\"uploads\\/products\\/product_67d1063538dcb_1741751861.jpg\"]', '2025-03-12 03:57:41', '9', '2025-03-12 03:57:41', '2025-03-12 03:57:41'),
+(38, 'OG LOGO Sweat Pants', 'Tax not included. Free shipping.', 17.00, '', 10, '[\"uploads\\/products\\/product_67d1064e99683_1741751886.jpg\",\"uploads\\/products\\/product_67d1064e99b8e_1741751886.jpg\"]', '2025-03-12 03:58:06', '9', '2025-03-12 03:58:06', '2025-03-12 03:58:06');
 
 -- --------------------------------------------------------
 
@@ -222,7 +207,7 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `customer_orders`
   ADD PRIMARY KEY (`order_id`,`product_id`),
-  ADD KEY `fk_product` (`product_id`);
+  ADD KEY `customer_orders_ibfk_1` (`product_id`);
 
 --
 -- Indexes for table `orders`
@@ -253,37 +238,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `customer_orders`
 --
 ALTER TABLE `customer_orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables
@@ -293,7 +278,7 @@ ALTER TABLE `users`
 -- Constraints for table `customer_orders`
 --
 ALTER TABLE `customer_orders`
-  ADD CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`),
+  ADD CONSTRAINT `customer_orders_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_customer_orders_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
