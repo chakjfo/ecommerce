@@ -142,107 +142,262 @@ $productImages = json_decode($product['images'], true) ?: [];
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
-        #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            min-height: 100vh;
-            background: #343a40;
-            color: #fff;
-            transition: all 0.3s;
-        }
-        #sidebar.active {
-            margin-left: -250px;
-        }
-        #sidebar .sidebar-header {
-            padding: 20px;
-            background: #212529;
-        }
-        #sidebar ul.components {
-            padding: 20px 0;
-            border-bottom: 1px solid #4b545c;
-        }
-        #sidebar ul p {
-            color: #fff;
-            padding: 10px;
-        }
-        #sidebar ul li a {
-            padding: 10px;
-            font-size: 1.1em;
-            display: block;
-            color: #fff;
-            text-decoration: none;
-        }
-        #sidebar ul li a:hover {
-            color: #000;
-            background: #fff;
-        }
-        #sidebar ul li.active > a,
-        a[aria-expanded="true"] {
-            color: #fff;
-            background: #6d7fcc;
-        }
-        ul ul a {
-            font-size: 0.9em !important;
-            padding-left: 30px !important;
-            background: #4b545c;
-        }
-        .wrapper {
-            display: flex;
-            width: 100%;
-        }
-        #content {
-            width: 100%;
-            padding: 20px;
-            min-height: 100vh;
-            transition: all 0.3s;
-        }
-        @media (max-width: 768px) {
-            #sidebar {
-                margin-left: -250px;
-            }
-            #sidebar.active {
-                margin-left: 0;
-            }
-            #sidebarCollapse span {
-                display: none;
-            }
-        }
-        .image-preview {
-            width: 150px;
-            height: 150px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            background-color: #f8f9fa;
-            position: relative;
-        }
-        .image-preview img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        .delete-image {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-    </style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+    :root {
+    --primary-color: #4e73df;
+    --secondary-color: #1cc88a;
+    --dark-color: #2c3e50;
+    --light-color: #f8f9fc;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+}
+/* Sidebar Styles */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--dark-color) 0%, #1a252f 100%);
+    color: #fff;
+    transition: all 0.3s;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    z-index: 1000;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 1.5rem 1rem;
+    background: rgba(0,0,0,0.1);
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#sidebar .sidebar-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+#sidebar ul.components {
+    padding: 1rem 0;
+}
+
+#sidebar ul li a {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    display: block;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    letter-spacing: 0.5px;
+}
+
+#sidebar ul li a:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-left: 3px solid var(--secondary-color);
+}
+
+#sidebar ul li.active > a {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border-left: 3px solid var(--primary-color);
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+#sidebar ul ul a {
+    padding-left: 3rem !important;
+    font-size: 0.85rem !important;
+    background: rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    
+    #sidebar.active {
+        margin-left: 0;
+    }
+    
+    .sidebarToggle {
+        visibility: visible;
+    }
+}
+
+
+    ul ul a {
+        font-size: 0.9em !important;
+        padding-left: 30px !important;
+        background: #4b545c;
+    }
+
+    .wrapper {
+        display: flex;
+        width: 100%;
+    }
+
+    #content {
+        width: 100%;
+        padding: 20px;
+        min-height: 100vh;
+        transition: all 0.3s;
+    }
+
+    .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-header {
+        background: linear-gradient(180deg, #343a40 0%, #212529 100%);
+        color: #fff;
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .btn {
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        background-color: #f8f9fa;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 4px;
+        transition: transform 0.3s ease;
+    }
+
+    .image-preview:hover img {
+        transform: scale(1.1);
+    }
+
+    .delete-image {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .delete-image:hover {
+        background-color: #c82333;
+    }
+
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #343a40;
+    }
+
+    .alert {
+        border-radius: 4px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .input-group-text {
+        background-color: #e9ecef;
+        border: 1px solid #ddd;
+        color: #495057;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
 </head>
 <body>
     <div class="wrapper">
@@ -289,9 +444,6 @@ $productImages = json_decode($product['images'], true) ?: [];
                     <ul class="collapse list-unstyled" id="orderSubmenu">
                         <li>
                             <a href="orders.php">View All Orders</a>
-                        </li>
-                        <li>
-                            <a href="order_details.php">Order Details</a>
                         </li>
                     </ul>
                 </li>

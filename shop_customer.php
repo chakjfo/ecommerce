@@ -165,7 +165,6 @@ $category_result = $conn->query($category_query);
         
         /* Product Card Styles */
         .product-card {
-            background: white;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -643,7 +642,7 @@ $category_result = $conn->query($category_query);
                     </div>
                     
                     <div class="control-group">
-                        <label for="quantityInput">Quantity:</label>
+                        <label for="quantityInput" >Quantity:</label>
                         <input type="number" id="quantityInput" min="1" value="1" oninput="validateQuantity()" />
                     </div>
                 </div>

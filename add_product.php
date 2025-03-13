@@ -145,86 +145,249 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
-        #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            min-height: 100vh;
-            background: #343a40;
-            color: #fff;
-            transition: all 0.3s;
-        }
-        #sidebar.active {
-            margin-left: -250px;
-        }
-        #sidebar .sidebar-header {
-            padding: 20px;
-            background: #212529;
-        }
-        #sidebar ul.components {
-            padding: 20px 0;
-            border-bottom: 1px solid #4b545c;
-        }
-        #sidebar ul p {
-            color: #fff;
-            padding: 10px;
-        }
-        #sidebar ul li a {
-            padding: 10px;
-            font-size: 1.1em;
-            display: block;
-            color: #fff;
-            text-decoration: none;
-        }
-        #sidebar ul li a:hover {
-            color: #000;
-            background: #fff;
-        }
-        #sidebar ul li.active > a,
-        a[aria-expanded="true"] {
-            color: #fff;
-            background: #6d7fcc;
-        }
-        ul ul a {
-            font-size: 0.9em !important;
-            padding-left: 30px !important;
-            background: #4b545c;
-        }
-        .wrapper {
-            display: flex;
-            width: 100%;
-        }
-        #content {
-            width: 100%;
-            padding: 20px;
-            min-height: 100vh;
-            transition: all 0.3s;
-        }
-        @media (max-width: 768px) {
-            #sidebar {
-                margin-left: -250px;
-            }
-            #sidebar.active {
-                margin-left: 0;
-            }
-            #sidebarCollapse span {
-                display: none;
-            }
-        }
-        .image-preview {
-            margin-top: 10px;
-        }
-        .image-preview img {
-            max-width: 100px;
-            max-height: 100px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px;
-            margin-right: 10px;
-        }
+/* Reuse Admin Panel Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #1cc88a;
+    --dark-color: #2c3e50;
+    --light-color: #f8f9fc;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+}
+/* Sidebar Styles */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--dark-color) 0%, #1a252f 100%);
+    color: #fff;
+    transition: all 0.3s;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    z-index: 1000;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 1.5rem 1rem;
+    background: rgba(0,0,0,0.1);
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#sidebar .sidebar-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+#sidebar ul.components {
+    padding: 1rem 0;
+}
+
+#sidebar ul li a {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    display: block;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    letter-spacing: 0.5px;
+}
+
+#sidebar ul li a:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-left: 3px solid var(--secondary-color);
+}
+
+#sidebar ul li.active > a {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border-left: 3px solid var(--primary-color);
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+#sidebar ul ul a {
+    padding-left: 3rem !important;
+    font-size: 0.85rem !important;
+    background: rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    
+    #sidebar.active {
+        margin-left: 0;
+    }
+    
+    .sidebarToggle {
+        visibility: visible;
+    }
+}
+
+ul ul a {
+    font-size: 0.9em !important;
+    padding-left: 40px !important;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+}
+
+#content {
+    width: 100%;
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    font-weight: 600;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #2b3035 0%, #1a1e21 100%);
+    color: #fff;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0a58ca 0%, #0d6efd 100%);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    border: none;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #6c757d 100%);
+    transform: translateY(-2px);
+}
+
+/* Image Preview Styles */
+.image-preview {
+    margin-top: 10px;
+}
+
+.image-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+    margin-right: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.image-preview img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Table Styles */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table thead th {
+    background-color: #f5f5f5;
+    border-bottom: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td, .table th {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: #fff;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: #fff;
+}
     </style>
 </head>
 <body>
@@ -272,9 +435,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <li>
                             <a href="orders.php">View All Orders</a>
                         </li>
-                        <li>
-                            <a href="order_details.php">Order Details</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -289,7 +449,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-dark">
                         <i class="fas fa-align-left"></i>
-                        <span>Toggle Sidebar</span>
                     </button>
                     <div>
                         <h4>Welcome, <?php echo $_SESSION['Username'] ?? 'Admin'; ?></h4>
@@ -322,8 +481,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
                 
                 <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Product Details</h5>
+                    <div class="card-header bg-dark text-white" style="background: linear-gradient(135deg, #343a40, #212529);">
+                        <h5 class="mb-0"><i class="fas fa-cube"></i> Product Details</h5>
                     </div>
                     <div class="card-body">
                         <form action="add_product.php" method="POST" enctype="multipart/form-data">

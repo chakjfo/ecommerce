@@ -44,86 +44,250 @@ if ($result->num_rows === 1) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
-        #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            min-height: 100vh;
-            background: #343a40;
-            color: #fff;
-            transition: all 0.3s;
-        }
-        #sidebar.active {
-            margin-left: -250px;
-        }
-        #sidebar .sidebar-header {
-            padding: 20px;
-            background: #212529;
-        }
-        #sidebar ul.components {
-            padding: 20px 0;
-            border-bottom: 1px solid #4b545c;
-        }
-        #sidebar ul p {
-            color: #fff;
-            padding: 10px;
-        }
-        #sidebar ul li a {
-            padding: 10px;
-            font-size: 1.1em;
-            display: block;
-            color: #fff;
-            text-decoration: none;
-        }
-        #sidebar ul li a:hover {
-            color: #000;
-            background: #fff;
-        }
-        #sidebar ul li.active > a,
-        a[aria-expanded="true"] {
-            color: #fff;
-            background: #6d7fcc;
-        }
-        ul ul a {
-            font-size: 0.9em !important;
-            padding-left: 30px !important;
-            background: #4b545c;
-        }
-        .wrapper {
-            display: flex;
-            width: 100%;
-        }
-        #content {
-            width: 100%;
-            padding: 20px;
-            min-height: 100vh;
-            transition: all 0.3s;
-        }
-        @media (max-width: 768px) {
-            #sidebar {
-                margin-left: -250px;
-            }
-            #sidebar.active {
-                margin-left: 0;
-            }
-            #sidebarCollapse span {
-                display: none;
-            }
-        }
-        .dashboard-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-    </style>
+<style>
+    body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #1cc88a;
+    --dark-color: #2c3e50;
+    --light-color: #f8f9fc;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+}
+/* Sidebar Styles */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--dark-color) 0%, #1a252f 100%);
+    color: #fff;
+    transition: all 0.3s;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    z-index: 1000;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 1.5rem 1rem;
+    background: rgba(0,0,0,0.1);
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#sidebar .sidebar-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+#sidebar ul.components {
+    padding: 1rem 0;
+}
+
+#sidebar ul li a {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    display: block;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    letter-spacing: 0.5px;
+}
+
+#sidebar ul li a:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-left: 3px solid var(--secondary-color);
+}
+
+#sidebar ul li.active > a {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border-left: 3px solid var(--primary-color);
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+#sidebar ul ul a {
+    padding-left: 3rem !important;
+    font-size: 0.85rem !important;
+    background: rgba(0,0,0,0.15);
+}
+
+
+
+ul ul a {
+    font-size: 0.9em !important;
+    padding-left: 40px !important;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+}
+
+#content {
+    width: 100%;
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    
+    #sidebar.active {
+        margin-left: 0;
+    }
+    
+    .sidebarToggle {
+        visibility: visible;
+    }
+}
+.dashboard-card {
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+    border: none;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-card .card-body {
+    padding: 25px;
+}
+
+.dashboard-card h5 {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.dashboard-card h3 {
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+.dashboard-card .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: all 0.3s;
+}
+
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.navbar .btn {
+    border-radius: 6px;
+    padding: 10px 16px;
+}
+
+table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table thead th {
+    background-color: #f5f5f5;
+    border-bottom: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td, .table th {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+    padding: 15px 20px;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-info {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.container-fluid {
+    padding: 0 25px;
+}
+
+h2, h3, h4, h5 {
+    font-weight: 600;
+}
+
+h2.mb-4 {
+    color: #343a40;
+    margin-bottom: 25px !important;
+    font-size: 1.8rem;
+}
+
+/* Enhanced card colors */
+.bg-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e5ac06 100%) !important;
+}
+
+.bg-dark {
+    background: linear-gradient(135deg, #212529 0%, #1a1e21 100%) !important;
+}
+</style>
 </head>
 <body>
     <div class="wrapper">

@@ -26,6 +26,14 @@ $stmt->bind_param("i", $order_id);
 $stmt->execute();
 $customer = $stmt->get_result()->fetch_assoc();
 
+// Sanitize phone number by removing non-numeric characters
+$phone_number = preg_replace('/[^0-9]/', '', $customer['phone']);
+
+// Validate phone number
+if (!ctype_digit($phone_number)) {
+    $phone_number = "Invalid phone number"; // or handle it differently
+}
+
 // Fetch order items with price from the products table
 $items_query = "SELECT co.product_id, co.quantity, p.ProductName, p.Price 
                FROM customer_orders co
@@ -231,6 +239,7 @@ $items = $stmt->get_result();
             max-width: 1200px;
             margin: 150px auto 50px;
             padding: 20px;
+            position: flex;
         }
         
         .waybill {
@@ -311,6 +320,20 @@ $items = $stmt->get_result();
                 display: none;
             }
         }
+        .continue-shopping-btn {
+    background-color: #000;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.continue-shopping-btn:hover {
+    background-color: #333;
+}
     </style>
 </head>
 <body>
@@ -442,6 +465,11 @@ $items = $stmt->get_result();
     <div class="mt-4 text-center">
         <p>Thank you for your order!</p>
         <p class="text-muted">If you have any questions about your order, please contact our customer service.</p>
+
+        <!-- Add the "Continue Shopping" button -->
+        <a href="shop_customer.php" class="btn btn-primary continue-shopping-btn">
+            <i class="fas fa-shopping-bag"></i> Continue Shopping
+        </a>
     </div>
 </div>
         </div> 
